@@ -259,14 +259,11 @@ export function parseRegimes(texto: string): { clientes: Parceiro[]; fornecedore
   return { clientes, fornecedores };
 }
 
-/** Simulação da Reforma Tributária: 1ª FASE 2027, mês a mês. */
-export function parseSimulacaoReforma(texto: string): Pick<Simulacoes, "simplesAtual" | "simplesHibrido" | "tributos"> {
+/** Simulação da Reforma Tributária: 1ª FASE 2027, mês a mês (Simples atual). */
+export function parseSimulacaoReforma(texto: string): Pick<Simulacoes, "simplesAtual" | "tributos"> {
   const simplesAtual = zeros();
-  const simplesHibrido = zeros();
   const NOMES_ATUAIS = ["IRPJ", "CSLL", "INSS/CPP", "IPI", "ICMS", "ISS", "PIS/Pasep", "COFINS"];
-  const NOMES_HIBRIDO = ["Simples Nacional", "CBS", "IBS"];
   const somaAtuais = NOMES_ATUAIS.map(() => 0);
-  const somaHibrido = NOMES_HIBRIDO.map(() => 0);
   const linhas = texto.split("\n");
   let mes = -1;
   let esperando = false;
@@ -288,29 +285,26 @@ export function parseSimulacaoReforma(texto: string): Pick<Simulacoes, "simplesA
     if (!esperando || mes < 0) continue;
     const valores = linha.match(RX_VALOR);
     if (!valores || valores.length < 12) continue;
-    // colunas: 8 tributos atuais + Total(8) ... Simples(9) CBS(10) IBS(11) Total(12)
+    // colunas: 8 tributos atuais + Total(8)
     simplesAtual[mes] = num(valores[8] ?? "");
-    simplesHibrido[mes] = num(valores[12] ?? "");
     NOMES_ATUAIS.forEach((_, i) => {
       somaAtuais[i] = (somaAtuais[i] ?? 0) + num(valores[i] ?? "");
-    });
-    NOMES_HIBRIDO.forEach((_, i) => {
-      somaHibrido[i] = (somaHibrido[i] ?? 0) + num(valores[9 + i] ?? "");
     });
     esperando = false;
   }
   return {
     simplesAtual,
-    simplesHibrido,
     tributos: {
       simplesAtual: NOMES_ATUAIS.map((nome, i) => ({ nome, valor: somaAtuais[i] ?? 0 })).filter((t) => t.valor !== 0),
-      simplesHibrido: NOMES_HIBRIDO.map((nome, i) => ({ nome, valor: somaHibrido[i] ?? 0 })).filter((t) => t.valor !== 0),
     },
   };
 }
 
-/** Planejamento Tributário: linhas de Lucro Presumido e Lucro Real do ano de 2027. */
-export function parsePlanejamento(texto: string): Pick<Simulacoes, "lucroPresumido" | "lucroReal" | "tributos"> {
+
+/** Planejamento Tributário: Simples Híbrido, Lucro Presumido e Lucro Real do ano de 2027. */
+export function parsePlanejamento(
+  texto: string,
+): Pick<Simulacoes, "simplesHibrido" | "lucroPresumido" | "lucroReal" | "tributos"> {
   const pegar = (rotulo: RegExp) => {
     for (const linha of texto.split("\n")) {
       if (!rotulo.test(linha.trim())) continue;
@@ -338,15 +332,28 @@ export function parsePlanejamento(texto: string): Pick<Simulacoes, "lucroPresumi
     return itens;
   };
 
+  // O modelo híbrido corresponde à linha "Simples Nacional" do planejamento:
+  // Anexo do Simples (sem PIS/COFINS) + tributos apurados no regime regular (CBS/IBS).
+  const hibridoAnexo = tributosDe(/DETALHAMENTO SIMPLES NACIONAL \(ANEXO/i);
+  const hibridoRegular = tributosDe(/DETALHAMENTO SIMPLES NACIONAL - IMPOSTOS CALCULADOS NO REGIME REGULAR/i);
+  const somar = (itens: { nome: string; valor: number }[]) => {
+    const mapa = new Map<string, number>();
+    for (const it of itens) mapa.set(it.nome, (mapa.get(it.nome) ?? 0) + it.valor);
+    return [...mapa].map(([nome, valor]) => ({ nome, valor })).filter((t) => t.valor !== 0);
+  };
+
   return {
+    simplesHibrido: pegar(/^Simples Nacional\b/i),
     lucroPresumido: pegar(/^Lucro Presumido\b/i),
     lucroReal: pegar(/^Lucro Real\b/i),
     tributos: {
+      simplesHibrido: somar([...hibridoAnexo, ...hibridoRegular]),
       lucroPresumido: tributosDe(/DETALHAMENTO LUCRO PRESUMIDO/i),
       lucroReal: tributosDe(/DETALHAMENTO LUCRO REAL/i),
     },
   };
 }
+
 
 /** Consulta de CNAE: compreende / não compreende para um código. */
 export function parseCnae(texto: string): { codigo: string; compreende: string; naoCompreende: string; anexo: string } {

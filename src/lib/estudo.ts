@@ -109,7 +109,7 @@ export type Estudo = {
 
 export const CENARIOS = [
   { key: "simplesAtual", label: "Simples Nacional — atual", fonte: "Detalhamento Simulação de Cálculo da Reforma Tributária · 2027" },
-  { key: "simplesHibrido", label: "Simples Nacional — modelo híbrido", fonte: "Detalhamento Simulação de Cálculo da Reforma Tributária · 2027" },
+  { key: "simplesHibrido", label: "Simples Nacional — modelo híbrido", fonte: "Consulta Planejamento Tributário · 2027" },
   { key: "lucroPresumido", label: "Lucro Presumido", fonte: "Consulta Planejamento Tributário · 2027" },
   { key: "lucroReal", label: "Lucro Real", fonte: "Consulta Planejamento Tributário · 2027" },
 ] as const satisfies ReadonlyArray<{ key: CenarioKey; label: string; fonte: string }>;
@@ -306,7 +306,7 @@ export const estudoExemplo: Estudo = {
   ],
   simulacoes: {
     simplesAtual: [35406.2, 30596.58, 27734.15, 31188.74, 30416.7, 31739.41, 32642.45, 0, 0, 0, 0, 0],
-    simplesHibrido: [66637.57, 58408.68, 50496.9, 57864.91, 56118.55, 58693.12, 65584.67, 0, 0, 0, 0, 0],
+    simplesHibrido: [42459.07, 37018.93, 32421.54, 37034.8, 36095.45, 37878.75, 41721.3, 0, 0, 0, 0, 0],
     lucroPresumido: [45953.84, 41271.3, 95624.05, 41631.73, 40559.53, 101073.15, 47253.97, 0, 16343.29, 0, 0, 0],
     lucroReal: [45953.84, 41271.3, 111664.74, 41631.73, 40559.53, 115985.85, 47253.97, 0, 21436.29, 0, 0, 0],
     tributos: {
@@ -319,8 +319,11 @@ export const estudoExemplo: Estudo = {
         { nome: "COFINS", valor: 29259.48 },
       ],
       simplesHibrido: [
-        { nome: "Simples Nacional", valor: 184119.91 },
-        { nome: "CBS", valor: 229684.49 },
+        { nome: "ISS", valor: 59084.7 },
+        { nome: "CSLL", valor: 6362.97 },
+        { nome: "IRPJ", valor: 7271.96 },
+        { nome: "INSS/CPP", valor: 78900.81 },
+        { nome: "CBS", valor: 113009.4 },
       ],
       lucroPresumido: [
         { nome: "CBS", valor: 113009.4 },
@@ -339,7 +342,7 @@ export const estudoExemplo: Estudo = {
     },
   },
   observacoes:
-    "Dados cadastrais conforme Comprovante de Inscrição CNPJ emitido em 06/09/2026. Faturamento e perfil tributário de clientes e fornecedores referentes ao período de 01/01/2026 a 31/07/2026. Alíquotas de referência para 2027: IBS 18,70% e CBS 9,21%. Simples Nacional atual e modelo híbrido extraídos do Detalhamento Simulação de Cálculo da Reforma Tributária (1ª Fase 2027); Lucro Presumido e Lucro Real extraídos da Consulta Planejamento Tributário (ano 2027). Meses sem movimento permanecem zerados por ausência de dados no período.",
+    "Dados cadastrais conforme Comprovante de Inscrição CNPJ emitido em 06/09/2026. Faturamento e perfil tributário de clientes e fornecedores referentes ao período de 01/01/2026 a 31/07/2026. Alíquotas de referência para 2027: IBS 18,70% e CBS 9,21%. Simples Nacional atual extraído do Detalhamento Simulação de Cálculo da Reforma Tributária (1ª Fase 2027); Simples Nacional híbrido, Lucro Presumido e Lucro Real extraídos da Consulta Planejamento Tributário (ano 2027). Meses sem movimento permanecem zerados por ausência de dados no período.",
   diagnostico: { ...diagnosticoPadrao, emitidoEm: "06 de setembro de 2026" },
 };
 

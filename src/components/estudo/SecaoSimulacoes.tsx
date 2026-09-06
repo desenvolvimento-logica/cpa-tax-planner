@@ -131,10 +131,11 @@ export function SecaoSimulacoes({
       </div>
 
       <p className="mt-4 text-xs text-muted-foreground">
-        Fontes: Simples Nacional atual e híbrido — relatório <em>Detalhamento Simulação de Cálculo da Reforma
-        Tributária</em>, cenário 2027. Lucro Presumido e Lucro Real — relatório <em>Consulta Planejamento
-        Tributário</em>, cenário 2027.
+        Fontes: Simples Nacional atual — relatório <em>Detalhamento Simulação de Cálculo da Reforma Tributária</em>,
+        cenário 2027. Simples Nacional modelo híbrido, Lucro Presumido e Lucro Real — relatório <em>Consulta
+        Planejamento Tributário</em>, cenário 2027.
       </p>
+
     </Painel>
   );
 }
