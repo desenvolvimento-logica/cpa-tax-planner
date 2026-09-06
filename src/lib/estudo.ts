@@ -2,6 +2,7 @@ export const ALIQUOTA_IBS = 0.187;
 export const ALIQUOTA_CBS = 0.0921;
 
 export const REGIMES = [
+  "Normal",
   "Lucro Real",
   "Lucro Presumido",
   "Simples Nacional",
@@ -12,7 +13,8 @@ export const REGIMES = [
 export type Regime = (typeof REGIMES)[number];
 
 /** Regimes que geram crédito de IBS/CBS para o adquirente. */
-export const REGIMES_COM_CREDITO: Regime[] = ["Lucro Real", "Lucro Presumido"];
+export const REGIMES_COM_CREDITO: Regime[] = ["Normal", "Lucro Real", "Lucro Presumido"];
+
 
 export const MESES = [
   "Jan",
@@ -112,70 +114,145 @@ export const estudoVazio: Estudo = {
 };
 
 export const estudoExemplo: Estudo = {
-  escritorio: "Contmais Assessoria Contábil",
+  escritorio: "Lógica Assessoria Contábil LTDA — EPP",
   cadastro: {
-    razaoSocial: "Vetor Logística e Comércio LTDA",
-    nomeFantasia: "Vetor Log",
-    cnpj: "12.345.678/0001-90",
-    abertura: "14/03/2013",
-    endereco: "Av. das Nações, 1200 — Sala 8 — São Paulo/SP — 04578-000",
-    situacao: "Ativa",
+    razaoSocial: "JGWEBCOM SOLUCOES TECNOLOGICAS LTDA",
+    nomeFantasia: "JGWEBCOM",
+    cnpj: "11.791.968/0001-08",
+    abertura: "25/03/2010",
+    endereco:
+      "Av. dos Trabalhadores, 116 — Sala 501 e 502, Edif. The Diploma Office — Vila Castelo Branco — Indaiatuba/SP — 13.338-050",
+    situacao: "Ativa desde 25/03/2010 — Porte ME",
     naturezaJuridica: "206-2 — Sociedade Empresária Limitada",
     regimeAtual: "Simples Nacional",
-    capitalSocial: "R$ 250.000,00",
+    capitalSocial: "—",
   },
   cnaes: [
     {
       id: "c1",
-      codigo: "4930-2/02",
-      descricao: "Transporte rodoviário de carga, exceto produtos perigosos e mudanças, intermunicipal, interestadual e internacional",
-      compreende: "Transporte de cargas em geral por rodovia entre municípios e estados; coleta e entrega vinculadas ao frete contratado.",
-      naoCompreende: "Transporte de produtos perigosos (4930-2/03); serviços de mudança (4930-2/04); armazenagem isolada.",
-      anexo: "Anexo III",
+      codigo: "7311-4/00",
+      descricao: "Agências de publicidade (atividade principal)",
+      compreende:
+        "Criação e produção de campanhas de publicidade para qualquer finalidade, para veiculação em quaisquer veículos de comunicação; colocação, em nome de clientes, de material publicitário em jornais, revistas, rádio, televisão, internet e outros veículos; representação de veículos de comunicação para venda de tempo ou espaço publicitário; serviços de merchandising em rádio e televisão.",
+      naoCompreende:
+        "Operação de páginas de publicidade na internet (6319-4/00); agenciamento de espaços para publicidade, exceto em veículos de comunicação (7312-2/00); distribuição ou entrega de material publicitário (7319-0/02); promoção de vendas e publicidade no local da venda (7319-0/02); publicidade por mala direta, telefone ou visitas (7319-0/03); pesquisas de mercado e de opinião pública (7320-3/00).",
+      anexo:
+        "Anexo V (sujeito ao Fator R — passa ao Anexo III quando o Fator R for igual ou superior a 28%) — art. 18, § 5º-I, X e § 5º-J da LC 123/2006",
     },
     {
       id: "c2",
-      codigo: "5211-7/99",
-      descricao: "Depósitos de mercadorias para terceiros, exceto armazéns gerais e guarda-móveis",
-      compreende: "Guarda e conservação de mercadorias de terceiros, controle de estoque e movimentação interna.",
-      naoCompreende: "Armazéns gerais com emissão de warrant (5211-7/01); guarda-móveis (5211-7/02).",
-      anexo: "Anexo III",
+      codigo: "6201-5/01",
+      descricao: "Desenvolvimento de programas de computador sob encomenda",
+      compreende:
+        "Desenvolvimento de sistemas conforme a necessidade do cliente (definição de módulos, especificações funcionais internas, relatórios e testes de desempenho); programação com uso de ferramentas e linguagens de programação; fornecimento de documentação dos programas desenvolvidos sob encomenda; desenvolvimento de projetos e modelagem de banco de dados sob encomenda.",
+      naoCompreende:
+        "Desenho de páginas para a internet — web design (6201-5/02); desenvolvimento e licenciamento de programas customizáveis (6202-3/00); desenvolvimento e licenciamento de programas não customizáveis (6203-1/00); customização de programas de computador (6204-0/00).",
+      anexo:
+        "Anexo III (sujeito ao Fator R — passa ao Anexo V quando o Fator R for inferior a 28%) — art. 18, § 5º-D, IV e § 5º-M, II da LC 123/2006",
     },
     {
       id: "c3",
-      codigo: "4649-4/99",
-      descricao: "Comércio atacadista de outros equipamentos e artigos de uso pessoal e doméstico não especificados anteriormente",
-      compreende: "Revenda por atacado de mercadorias adquiridas de terceiros para lojistas e empresas.",
-      naoCompreende: "Comércio varejista ao consumidor final; representação comercial por conta de terceiros.",
-      anexo: "Anexo I",
+      codigo: "6209-1/00",
+      descricao: "Suporte técnico, manutenção e outros serviços em tecnologia da informação",
+      compreende:
+        "Assessoramento ao usuário na utilização de sistemas, remotamente ou nas instalações do cliente (help-desk); solução de problemas de navegabilidade e utilização de websites; recuperação de panes informáticas; instalação de equipamentos de informática e de programas; manutenção em tecnologia da informação, com modificações no sistema para atender alterações técnicas, aprimorar recursos e corrigir falhas.",
+      naoCompreende:
+        "Assessoria em informática associada à venda de computadores e periféricos (47.51-2 e 46.51-6); desenvolvimento de programas sob encomenda (6201-5/00); customização de programas (6204-0/00); reparação e manutenção de computadores e periféricos (9511-8/00).",
+      anexo:
+        "Anexo III para instalação de computadores e periféricos (art. 18, § 5º-F); Anexo V sujeito ao Fator R para suporte técnico e manutenção em TI (art. 18, § 5º-I, XII e § 5º-J), passando ao Anexo III com Fator R ≥ 28%",
     },
   ],
-  faturamento: [382000, 341000, 435000, 418000, 456000, 490000, 402000, 388000, 421000, 447000, 463000, 377000],
+  // Faturamento declarado de 01/01/2026 a 31/07/2026 — total R$ 1.358.994,30
+  faturamento: [217281.3, 187029.3, 170205.5, 191820.8, 188320.8, 198975.5, 205361.1, 0, 0, 0, 0, 0],
   fornecedores: [
-    { id: "f1", nome: "Pneus Brasil Distribuidora S.A.", cnpj: "01.234.567/0001-11", regime: "Lucro Real", valor: 620000 },
-    { id: "f2", nome: "Auto Peças Central LTDA", cnpj: "02.345.678/0001-22", regime: "Lucro Presumido", valor: 410000 },
-    { id: "f3", nome: "Combustíveis Rota Sul LTDA", cnpj: "03.456.789/0001-33", regime: "Lucro Real", valor: 1000000 },
-    { id: "f4", nome: "Manutenção Diesel ME", cnpj: "04.567.890/0001-44", regime: "Simples Nacional", valor: 280000 },
-    { id: "f5", nome: "Embalagens Vale LTDA ME", cnpj: "05.678.901/0001-55", regime: "Simples Nacional", valor: 150000 },
-    { id: "f6", nome: "Transportador Autônomo — José R.", cnpj: "123.456.789-00", regime: "Outros (Pessoa Física)", valor: 300000 },
-    { id: "f7", nome: "Serviços de TI Nuvem MEI", cnpj: "06.789.012/0001-66", regime: "MEI", valor: 60000 },
+    { id: "f22", nome: "PLUXEE BENEFICIOS BRASIL S.A", cnpj: "69.034.668/0001-56", regime: "Normal", valor: 14.0 },
+    { id: "f32", nome: "VHSYS SISTEMA DE GESTAO S.A.", cnpj: "12.702.717/0001-64", regime: "Normal", valor: 3698.02 },
+    { id: "f57", nome: "UNIMED CAMPINAS COOPERATIVA DE TRABALHO MEDICO", cnpj: "46.124.624/0001-11", regime: "Normal", valor: 8035.08 },
+    { id: "f188", nome: "UNIMED CAMPINAS COOPERATIVA DE TRABALHO MEDICO", cnpj: "46.124.624/0001-11", regime: "Normal", valor: 53176.71 },
+    { id: "f189", nome: "AMAZON AWS SERVICOS BRASIL LTDA", cnpj: "23.412.247/0001-10", regime: "Normal", valor: 4996.63 },
+    { id: "f190", nome: "GOOGLE CLOUD BRASIL COMPUTACAO E SERVICOS DE DADOS LTDA.", cnpj: "25.012.398/0001-07", regime: "Normal", valor: 5586.0 },
+    { id: "f191", nome: "CLICKSIGN GESTAO DE DOCUMENTOS S/A", cnpj: "12.499.520/0001-70", regime: "Normal", valor: 354.0 },
+    { id: "f192", nome: "PAGAR.ME INSTITUICAO DE PAGAMENTO S.A", cnpj: "18.727.053/0001-74", regime: "Normal", valor: 5.04 },
+    { id: "f193", nome: "PLUXEE BENEFICIOS BRASIL S.A", cnpj: "69.034.668/0001-56", regime: "Normal", valor: 40404.0 },
+    { id: "f198", nome: "SANARE - SERVICOS DE SAUDE LTDA", cnpj: "05.653.550/0001-23", regime: "Normal", valor: 8115.6 },
+    { id: "f200", nome: "SMSMARKET SOLUCOES INTELIGENTES LTDA", cnpj: "14.948.864/0001-44", regime: "Normal", valor: 1470.0 },
+    { id: "f201", nome: "MLABS SOFTWARE S.A.", cnpj: "23.465.964/0001-00", regime: "Normal", valor: 1798.8 },
+    { id: "f204", nome: "IMUNOVACIN VACINAS LTDA.", cnpj: "24.433.654/0001-77", regime: "Normal", valor: 2200.0 },
+    { id: "f206", nome: "INNOVATION COMERCIO DE BRINDES", cnpj: "10.635.104/0001-26", regime: "Normal", valor: 532.0 },
+    { id: "f207", nome: "AUTO POSTO TRE FRATELLI LTDA", cnpj: "17.404.571/0001-94", regime: "Normal", valor: 2114.34 },
+    { id: "f208", nome: "SSR COMERCIO E SERVICOS LTDA", cnpj: "00.906.766/0002-10", regime: "Normal", valor: 349.2 },
+    { id: "f100", nome: "ANA CAROLINA MARQUES BULL DA SILVA (ME)", cnpj: "38.402.762/0001-97", regime: "Simples Nacional", valor: 1955.0 },
+    { id: "f196", nome: "PRISCILA RODRIGUES DE MENESES (ME)", cnpj: "33.302.739/0001-07", regime: "Simples Nacional", valor: 1450.0 },
+    { id: "f197", nome: "CLEBER ALVES DA SILVA (ME)", cnpj: "20.356.748/0001-39", regime: "Simples Nacional", valor: 145.0 },
+    { id: "f202", nome: "LHF CONFECCOES LTDA - ME", cnpj: "10.746.458/0001-48", regime: "Simples Nacional", valor: 1300.0 },
+    { id: "f203", nome: "SP INTELIGENCIA DIGITAL LTDA (ME)", cnpj: "19.652.495/0001-61", regime: "Simples Nacional", valor: 144.27 },
+    { id: "f205", nome: "RPZ AR CONDICIONADO LTDA (ME)", cnpj: "41.246.494/0001-76", regime: "Simples Nacional", valor: 850.0 },
+    { id: "f98", nome: "JUSCO COMERCIO DE MATERIAIS E PRODUTOS DE LIMPEZA LTDA (EPP)", cnpj: "00.023.815/0001-96", regime: "Simples Nacional", valor: 1277.5 },
+    { id: "f199", nome: "JC DIAS FILMES (EPP)", cnpj: "19.812.710/0001-44", regime: "Simples Nacional", valor: 22950.0 },
   ],
   clientes: [
-    { id: "cl1", nome: "Indústria Metalgraf S.A.", cnpj: "10.111.222/0001-01", regime: "Lucro Real", valor: 1850000 },
-    { id: "cl2", nome: "Distribuidora Norte LTDA", cnpj: "11.222.333/0001-02", regime: "Lucro Presumido", valor: 1230000 },
-    { id: "cl3", nome: "Comércio Estrela ME", cnpj: "12.333.444/0001-03", regime: "Simples Nacional", valor: 890000 },
-    { id: "cl4", nome: "Mercado Bom Preço EIRELI", cnpj: "13.444.555/0001-04", regime: "Simples Nacional", valor: 520000 },
-    { id: "cl5", nome: "Clientes Pessoa Física (consolidado)", cnpj: "—", regime: "Outros (Pessoa Física)", valor: 330000 },
+    { id: "cl11", nome: "PARQUE ECOLOGICO EDUCACAO LTDA", cnpj: "11.102.213/0001-40", regime: "Normal", valor: 64925.7 },
+    { id: "cl15", nome: "SANEX SOLUCOES EIRELI", cnpj: "05.350.401/0001-95", regime: "Normal", valor: 4749.0 },
+    { id: "cl19", nome: "SYMCO MEDICINA S/S LTDA", cnpj: "04.143.627/0001-52", regime: "Normal", valor: 5580.0 },
+    { id: "cl158", nome: "FACULDADE UNITA LTDA", cnpj: "04.187.523/0001-40", regime: "Normal", valor: 46240.0 },
+    { id: "cl159", nome: "ASSOCIACAO EDUCACIONAL LUMEN", cnpj: "14.100.215/0001-99", regime: "Normal", valor: 18760.0 },
+    { id: "cl260", nome: "MARGOSSIAN SEMENTES LTDA", cnpj: "02.729.532/0001-90", regime: "Normal", valor: 405.0 },
+    { id: "cl286", nome: "HILAQUI PRODUCOES E EVENTOS LTDA ME", cnpj: "08.756.668/0001-75", regime: "Normal", valor: 3510.0 },
+    { id: "cl433", nome: "CIENCIAS E LETRAS ENSINO LTDA", cnpj: "71.481.584/0001-02", regime: "Normal", valor: 19764.0 },
+    { id: "cl10007", nome: "CONGESA ENGENHARIA E CONSTRUCOES LTDA", cnpj: "96.161.237/0001-23", regime: "Normal", valor: 17148.9 },
+    { id: "cl10009", nome: "INOVA CONSULTORIA DE GESTAO E INOVACAO", cnpj: "22.110.885/0001-14", regime: "Normal", valor: 21400.0 },
+    { id: "cl10858", nome: "COLEGIO MORUMBI LTDA", cnpj: "05.482.594/0002-19", regime: "Normal", valor: 35560.0 },
+    { id: "cl10964", nome: "DE CRIANCA PARA CRIANCA COMERCIO DE MATERIAIS", cnpj: "28.201.868/0001-79", regime: "Normal", valor: 25837.0 },
+    { id: "cl11017", nome: "ESCOLA NOVA LOURENCO CASTANHO LTDA", cnpj: "62.623.335/0001-13", regime: "Normal", valor: 31726.5 },
+    { id: "cl11282", nome: "SISTEMA EDUCACIONAL BARAO LTDA", cnpj: "50.360.502/0001-00", regime: "Normal", valor: 15430.0 },
+    { id: "cl11425", nome: "CA INDAIATUBA 3 EMPREENDIMENTOS E PARTICIPACOES", cnpj: "10.464.114/0001-46", regime: "Normal", valor: 79400.0 },
+    { id: "cl11454", nome: "PARQUE ECOLOGICO EDUCACAO LTDA (filial)", cnpj: "11.102.213/0002-21", regime: "Normal", valor: 16730.7 },
+    { id: "cl11549", nome: "AA3 EMPREENDIMENTOS IMOBILIARIOS SPE LTDA", cnpj: "27.562.805/0001-85", regime: "Normal", valor: 2192.7 },
+    { id: "cl11568", nome: "SISTEMA EDUCACIONAL OSASCO LTDA", cnpj: "53.410.981/0001-01", regime: "Normal", valor: 10780.0 },
+    { id: "cl11777", nome: "SANTO ANTONIO 1 EMPREENDIMENTOS IMOBILIARIOS SPE", cnpj: "43.662.871/0001-83", regime: "Normal", valor: 15348.9 },
+    { id: "cl11815", nome: "JARDIM PLANALTO INCORPORACOES IMOBILIARIAS SPE LTDA", cnpj: "41.505.187/0001-62", regime: "Normal", valor: 29400.0 },
+    { id: "cl11820", nome: "FAHL SPE INDAIATUBA - LOTEAMENTO E INCORPORACAO", cnpj: "34.079.427/0001-49", regime: "Normal", valor: 88200.0 },
+    { id: "cl11920", nome: "SANTO ANTONIO 2 EMPREENDIMENTOS IMOBILIARIOS SPE", cnpj: "43.771.848/0001-27", regime: "Normal", valor: 15348.9 },
+    { id: "cl11978", nome: "24 DE MAIO EMPREENDIMENTO IMOBILIARIO SPE LTDA", cnpj: "51.685.586/0001-06", regime: "Normal", valor: 104538.0 },
+    { id: "cl12015", nome: "PARK MERAKI 10 EMPREENDIMENTOS E PARTICIPACOES", cnpj: "48.834.043/0001-07", regime: "Normal", valor: 2520.0 },
+    { id: "cl12320", nome: "TERRANOBILLIS EMPREENDIMENTOS IMOBILIARIOS", cnpj: "14.307.802/0001-53", regime: "Normal", valor: 72800.0 },
+    { id: "cl12359", nome: "ROED PARTICIPACOES E NEGOCIOS IMOBILIARIOS LTDA", cnpj: "55.020.725/0001-33", regime: "Normal", valor: 54585.0 },
+    { id: "cl12366", nome: "INDAIATUBA 1 EMPREENDIMENTO IMOBILIARIO SPE LTDA", cnpj: "54.443.323/0001-89", regime: "Normal", valor: 67200.0 },
+    { id: "cl12394", nome: "RESIDENCIAL TERRAS DE SAO BENTO EMPREENDIMENTOS", cnpj: "54.706.926/0001-26", regime: "Normal", valor: 55720.0 },
+    { id: "cl12399", nome: "GPCI E PECFLOR EMPREENDIMENTO IMOBILIARIO SPE", cnpj: "50.725.789/0001-16", regime: "Normal", valor: 67200.0 },
+    { id: "cl12439", nome: "AA7 EMPREENDIMENTOS IMOBILIARIOS SPE LTDA", cnpj: "52.818.417/0001-60", regime: "Normal", valor: 15532.7 },
+    { id: "cl12473", nome: "PARQUE VILLE DE PROVENCE EMPREENDIMENTO IMOBILIARIO", cnpj: "40.147.152/0001-36", regime: "Normal", valor: 106230.0 },
+    { id: "cl12485", nome: "TREVISO PAULINIA EMPREENDIMENTOS IMOBILIARIOS SPE", cnpj: "59.411.707/0001-33", regime: "Normal", valor: 14190.0 },
+    { id: "cl12486", nome: "SALTO RESERVA TOSCANA EMPREENDIMENTOS IMOBILIARIOS", cnpj: "31.383.618/0001-01", regime: "Normal", valor: 17200.0 },
+    { id: "cl12525", nome: "LINA RESIDENCE EMPREENDIMENTOS IMOBILIARIOS SPE", cnpj: "56.984.210/0001-16", regime: "Normal", valor: 84000.0 },
+    { id: "cl12545", nome: "PINHEIROS 1 EMPREENDIMENTOS IMOBILIARIOS SPE LTDA", cnpj: "50.161.190/0001-05", regime: "Normal", valor: 14322.2 },
+    { id: "cl12588", nome: "INSTITUTO EDUCACIONAL DE AMERICANA LTDA", cnpj: "11.181.562/0001-03", regime: "Normal", valor: 11573.3 },
+    { id: "cl12589", nome: "ANA MARIA VASTELLA VEGRO GIACOMIN", cnpj: "329.693.238-00", regime: "Normal", valor: 0 },
+    { id: "cl12590", nome: "CA QUINTA DA PRIMAVERA I EMPREENDIMENTOS IMOBILIARIOS", cnpj: "45.261.131/0001-60", regime: "Normal", valor: 29060.0 },
+    { id: "cl12591", nome: "LOFTS - PLANEJAMENTO E INCORPORACAO LTDA.", cnpj: "04.312.599/0001-50", regime: "Normal", valor: 30000.0 },
+    { id: "cl374", nome: "ASSOCIACAO DE ENSINO DE BOITUVA S/S LTDA (ME)", cnpj: "71.562.045/0001-06", regime: "Simples Nacional", valor: 5833.1 },
+    { id: "cl11147", nome: "A CARVALHO SERVICOS DE APOIO ADMINISTRATIVO LTDA (ME)", cnpj: "29.988.333/0001-52", regime: "Simples Nacional", valor: 380.0 },
+    { id: "cl11519", nome: "FABIO GOMES DE AVILA (ME)", cnpj: "05.315.131/0001-81", regime: "Simples Nacional", valor: 510.0 },
+    { id: "cl59", nome: "SOLARYS ENGENHARIA E INSTALACOES LTDA (EPP)", cnpj: "07.568.295/0001-46", regime: "Simples Nacional", valor: 500.0 },
+    { id: "cl278", nome: "UNITA EDUCACIONAL LTDA (EPP)", cnpj: "09.441.008/0001-68", regime: "Simples Nacional", valor: 3187.7 },
+    { id: "cl282", nome: "YPUA SANEAMENTO AMBIENTAL EIRELI (EPP)", cnpj: "21.429.112/0001-32", regime: "Simples Nacional", valor: 290.0 },
+    { id: "cl10346", nome: "WINES4U COMERCIO, IMPORTACAO E EXPORTACAO (EPP)", cnpj: "25.036.026/0001-10", regime: "Simples Nacional", valor: 28045.0 },
+    { id: "cl10705", nome: "GAIVOTA NATACAO LTDA (EPP)", cnpj: "00.744.402/0001-09", regime: "Simples Nacional", valor: 630.0 },
+    { id: "cl12423", nome: "R. PARK ESTACIONAMENTO DE VEICULOS LTDA (EPP)", cnpj: "10.893.982/0002-22", regime: "Simples Nacional", valor: 3780.0 },
+    { id: "cl10121", nome: "FAUSTO FERREIRA DA SILVA", cnpj: "584.460.528-49", regime: "Outros (Pessoa Física)", valor: 450.0 },
+    { id: "cl10782", nome: "MARIANA DE CASSIA GOMES", cnpj: "317.023.148-04", regime: "Outros (Pessoa Física)", valor: 280.0 },
+    { id: "cl11478", nome: "JOAO GABRIEL GIACOMIN", cnpj: "326.677.948-77", regime: "Outros (Pessoa Física)", valor: 0 },
   ],
   simulacoes: {
-    simplesAtual: [42800, 38200, 48700, 46800, 51100, 54900, 45000, 43400, 47100, 50100, 51900, 42200],
-    simplesHibrido: [38900, 34800, 44300, 42600, 46500, 49900, 40900, 39500, 42800, 45500, 47200, 38400],
-    lucroPresumido: [46100, 41200, 52500, 50500, 55100, 59200, 48500, 46800, 50800, 54000, 56000, 45500],
-    lucroReal: [40200, 35900, 45800, 44000, 48000, 51600, 42300, 40800, 44300, 47100, 48800, 39700],
+    simplesAtual: zeros(),
+    simplesHibrido: zeros(),
+    lucroPresumido: zeros(),
+    lucroReal: zeros(),
   },
   observacoes:
-    "Estudo elaborado com base nos relatórios Detalhamento Simulação de Cálculo da Reforma Tributária e Consulta Planejamento Tributário, cenário 2027. Alíquotas de referência: IBS 18,70% e CBS 9,21%.",
+    "Dados cadastrais conforme Comprovante de Inscrição CNPJ emitido em 06/09/2026. Faturamento e perfil tributário de clientes e fornecedores referentes ao período de 01/01/2026 a 31/07/2026. Alíquotas de referência para 2027: IBS 18,70% e CBS 9,21%. As simulações tributárias serão preenchidas com os relatórios Detalhamento Simulação de Cálculo da Reforma Tributária e Consulta Planejamento Tributário, cenário 2027.",
 };
+
 
 export const brl = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
@@ -231,9 +308,11 @@ export function agruparPorRegime(itens: Parceiro[]): {
 }
 
 export const CORES_REGIME: Record<Regime, string> = {
+  Normal: "var(--color-ink)",
   "Lucro Real": "var(--color-ink)",
   "Lucro Presumido": "var(--color-brand)",
   "Simples Nacional": "var(--color-accent)",
   MEI: "var(--color-line)",
   "Outros (Pessoa Física)": "var(--color-mist)",
 };
+

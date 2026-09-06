@@ -16,7 +16,9 @@ import {
   brl,
   CORES_REGIME,
   pct,
+  REGIMES_COM_CREDITO,
   type Parceiro,
+
 } from "@/lib/estudo";
 import { BotaoLinha, CampoTexto, CampoValor, Painel, SeletorRegime } from "./campos";
 
@@ -80,7 +82,7 @@ export function SecaoParceiros({ numero, tipo, itens, onChange }: Props) {
           </thead>
           <tbody>
             {itens.map((item) => {
-              const gera = item.regime === "Lucro Real" || item.regime === "Lucro Presumido";
+              const gera = REGIMES_COM_CREDITO.includes(item.regime);
               return (
                 <tr key={item.id} className="border-b border-line/70 align-middle">
                   <td className="py-1">
