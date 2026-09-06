@@ -67,7 +67,12 @@ function Index() {
           </div>
 
           <div className="mt-6 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-[48ch]">
+            <div className="max-w-[52ch]">
+              <img
+                src={logoLogica.url}
+                alt="Lógica na Reforma — da contabilidade à estratégia"
+                className="mb-5 h-20 w-auto mix-blend-multiply lg:h-24"
+              />
               <h1 className="text-balance font-display text-4xl font-semibold leading-none tracking-tighter lg:text-5xl">
                 Estudo do <span className="text-brand">Simples Nacional Híbrido</span>
               </h1>
@@ -75,6 +80,7 @@ function Index() {
                 Comparativo de regimes sob a Reforma Tributária (IBS 18,70% · CBS 9,21%) — cenário projetado para 2027.
               </p>
             </div>
+
             <div className="no-print flex items-center gap-3">
               <div className="text-right">
                 <p className="text-[11px] uppercase tracking-[0.15em] text-ink/50">Cenário</p>
