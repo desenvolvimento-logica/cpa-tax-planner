@@ -307,26 +307,37 @@ export function parsePlanejamento(texto: string): Pick<Simulacoes, "lucroPresumi
 
 /** Consulta de CNAE: compreende / não compreende para um código. */
 export function parseCnae(texto: string): { codigo: string; compreende: string; naoCompreende: string; anexo: string } {
-  const codigo = texto.match(/\d{2}\.\d{2}-\d[-/]\d{2}/)?.[0]?.replace("/", "-") ?? "";
-  const anexo = texto.match(/Anexo\s+(I{1,3}V?|IV|V)\b/i)?.[0] ?? "";
-  const linhas = texto.split("\n").map((l) => l.trim());
+  const bruto =
+    texto.match(/\d{2}\.\d{2}-\d[-/]\d{2}/)?.[0] ?? texto.match(/\d{4}-\d[-/]\d{2}/)?.[0] ?? "";
+  const digitos = bruto.replace(/\D/g, "");
+  const codigo =
+    digitos.length === 7 ? `${digitos.slice(0, 2)}.${digitos.slice(2, 4)}-${digitos[4]}-${digitos.slice(5)}` : bruto;
+  const anexo = texto.match(/Anexo\s+(III|IV|II|I|V)\b/i)?.[0] ?? "";
+
+  const linhas = texto.split("\n");
   const compreende: string[] = [];
   const naoCompreende: string[] = [];
-  let modo: "c" | "n" | null = null;
-  for (const l of linhas) {
-    const baixo = l.toLowerCase();
-    if (baixo.startsWith("esta subclasse não compreende") || baixo.startsWith("não compreende")) {
-      modo = "n";
+  let dentro = false;
+  let corte = 0;
+
+  for (const linha of linhas) {
+    const baixo = linha.toLowerCase();
+    if (!dentro) {
+      const iNao = baixo.indexOf("não compreende");
+      if (iNao > -1 && baixo.includes("compreende", 0)) {
+        dentro = true;
+        corte = iNao;
+      }
       continue;
     }
-    if (baixo.startsWith("esta subclasse compreende") || baixo.startsWith("compreende")) {
-      modo = "c";
-      continue;
-    }
-    if (!modo || !l) continue;
-    if (/^(notas|observa|página|fonte|cnae|classifica)/i.test(baixo)) continue;
-    (modo === "c" ? compreende : naoCompreende).push(l.replace(/^[-•]\s*/, ""));
+    if (/constitui[çc][ãa]o da empresa|tributa[çc][ãa]o|obriga[çc][õo]es acess/i.test(baixo)) break;
+    if (!linha.trim()) continue;
+    const esquerda = linha.slice(0, corte).trim();
+    const direita = linha.slice(corte).trim();
+    if (esquerda) compreende.push(esquerda.replace(/^[-•]\s*/, ""));
+    if (direita) naoCompreende.push(direita.replace(/^[-•]\s*/, ""));
   }
+
   return {
     codigo,
     anexo,
@@ -334,6 +345,7 @@ export function parseCnae(texto: string): { codigo: string; compreende: string; 
     naoCompreende: naoCompreende.join("\n").trim(),
   };
 }
+
 
 /* ------------------------------------------------------------------ */
 /* Aplicação no estudo                                                 */
