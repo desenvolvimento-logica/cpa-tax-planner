@@ -26,7 +26,7 @@ function Campo({
       <CampoTexto
         valor={valor}
         onChange={onChange}
-        multiline={multiline}
+        multiline={multiline ?? false}
         className={multiline ? `mt-1 ${linhas ?? "min-h-28"} text-sm` : "mt-1 text-sm"}
       />
     </label>
