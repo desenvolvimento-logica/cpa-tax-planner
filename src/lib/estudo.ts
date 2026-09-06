@@ -334,6 +334,8 @@ export type ResumoRegime = {
   geraCredito: boolean;
   ibs: number;
   cbs: number;
+  ibsPotencial: number;
+  cbsPotencial: number;
   quantidade: number;
 };
 
@@ -342,6 +344,8 @@ export function agruparPorRegime(itens: Parceiro[]): {
   total: number;
   totalIbs: number;
   totalCbs: number;
+  totalIbsPotencial: number;
+  totalCbsPotencial: number;
   totalSemCredito: number;
 } {
   const total = itens.reduce((a, b) => a + b.valor, 0);
@@ -357,6 +361,8 @@ export function agruparPorRegime(itens: Parceiro[]): {
       geraCredito,
       ibs: geraCredito ? valor * ALIQUOTA_IBS : 0,
       cbs: geraCredito ? valor * ALIQUOTA_CBS : 0,
+      ibsPotencial: valor * ALIQUOTA_IBS,
+      cbsPotencial: valor * ALIQUOTA_CBS,
     };
   }).filter((l) => l.quantidade > 0);
 
@@ -365,9 +371,12 @@ export function agruparPorRegime(itens: Parceiro[]): {
     total,
     totalIbs: linhas.reduce((a, b) => a + b.ibs, 0),
     totalCbs: linhas.reduce((a, b) => a + b.cbs, 0),
+    totalIbsPotencial: total * ALIQUOTA_IBS,
+    totalCbsPotencial: total * ALIQUOTA_CBS,
     totalSemCredito: linhas.filter((l) => !l.geraCredito).reduce((a, b) => a + b.valor, 0),
   };
 }
+
 
 export const CORES_REGIME: Record<Regime, string> = {
   Normal: "var(--color-ink)",
