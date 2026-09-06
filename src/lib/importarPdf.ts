@@ -318,25 +318,31 @@ export function parseCnae(texto: string): { codigo: string; compreende: string; 
   const compreende: string[] = [];
   const naoCompreende: string[] = [];
   let dentro = false;
-  let corte = 0;
+  let modo: "c" | "n" = "c";
 
   for (const linha of linhas) {
     const baixo = linha.toLowerCase();
     if (!dentro) {
-      const iNao = baixo.indexOf("não compreende");
-      if (iNao > -1 && baixo.includes("compreende", 0)) {
-        dentro = true;
-        corte = iNao;
-      }
+      if (baixo.includes("não compreende") && baixo.includes("compreende")) dentro = true;
       continue;
     }
-    if (/constitui[çc][ãa]o da empresa|tributa[çc][ãa]o|obriga[çc][õo]es acess/i.test(baixo)) break;
-    if (!linha.trim()) continue;
-    const esquerda = linha.slice(0, corte).trim();
-    const direita = linha.slice(corte).trim();
-    if (esquerda) compreende.push(esquerda.replace(/^[-•]\s*/, ""));
-    if (direita) naoCompreende.push(direita.replace(/^[-•]\s*/, ""));
+    if (/constitui[çc][ãa]o da empresa|obriga[çc][õo]es acess|econeteditora|^\s*https?:/i.test(baixo)) break;
+    const texto0 = linha.trim();
+    if (!texto0) continue;
+    if (/^esta subclasse não compreende/i.test(texto0)) {
+      modo = "n";
+      continue;
+    }
+    if (/^esta subclasse compreende/i.test(texto0)) {
+      modo = "c";
+      continue;
+    }
+    const destino = modo === "c" ? compreende : naoCompreende;
+    const item = texto0.replace(/^[-•]+\s*/, "");
+    if (/^[-•]/.test(texto0) || destino.length === 0) destino.push(item);
+    else destino[destino.length - 1] = `${destino[destino.length - 1]} ${item}`;
   }
+
 
   return {
     codigo,
