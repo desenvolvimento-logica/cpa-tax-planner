@@ -2,6 +2,7 @@ export const ALIQUOTA_IBS = 0.187;
 export const ALIQUOTA_CBS = 0.0921;
 
 export const REGIMES = [
+  "Normal",
   "Lucro Real",
   "Lucro Presumido",
   "Simples Nacional",
@@ -12,7 +13,8 @@ export const REGIMES = [
 export type Regime = (typeof REGIMES)[number];
 
 /** Regimes que geram crédito de IBS/CBS para o adquirente. */
-export const REGIMES_COM_CREDITO: Regime[] = ["Lucro Real", "Lucro Presumido"];
+export const REGIMES_COM_CREDITO: Regime[] = ["Normal", "Lucro Real", "Lucro Presumido"];
+
 
 export const MESES = [
   "Jan",
