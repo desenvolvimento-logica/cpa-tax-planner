@@ -284,7 +284,7 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
         <h3 className="mt-8 font-display text-[12pt] font-semibold text-brand">Próximos passos</h3>
         <Lista texto={d.proximosPassos} />
 
-        <h3 className="mt-8 font-display text-[12pt] font-semibold text-brand">Análise Tributária Completa</h3>
+        <h3 className="mt-6 font-display text-[12pt] font-semibold text-brand">Análise Tributária Completa</h3>
         <Lista texto={d.pacote} />
       </Pagina>
 
