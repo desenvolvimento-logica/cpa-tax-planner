@@ -296,7 +296,7 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
         <Paragrafos texto={d.prazos} />
 
         <Titulo>A análise que fizemos para você</Titulo>
-        <p className="mt-3 w-full text-center text-[10.5pt] leading-relaxed text-ink/85">
+        <p className="mt-3 w-full text-justify text-[10.5pt] leading-relaxed text-ink/85">
           Analisamos as vendas da sua empresa no ano-base de {d.anoBase}, somando {brlExato(faturamento)}. Veja como o
           seu faturamento se distribui entre os perfis de cliente e quanto de débito de CBS e IBS cada perfil
           representa:
