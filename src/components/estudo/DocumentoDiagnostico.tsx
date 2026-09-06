@@ -19,7 +19,7 @@ function Paragrafos({ texto, className }: { texto: string; className?: string })
         .map((l) => l.trim())
         .filter(Boolean)
         .map((linha, i) => (
-          <p key={i} className={className ?? "mt-3 w-full text-center text-[10.5pt] leading-relaxed text-ink/85"}>
+          <p key={i} className={className ?? "mt-3 w-full text-justify text-[10.5pt] leading-relaxed text-ink/85"}>
             {linha}
           </p>
         ))}
@@ -35,7 +35,7 @@ function Lista({ texto }: { texto: string }) {
   return (
     <ul className="mt-3 w-full space-y-2">
       {itens.map((item, i) => (
-        <li key={i} className="text-center text-[10.5pt] leading-relaxed text-ink/85">
+        <li key={i} className="text-justify text-[10.5pt] leading-relaxed text-ink/85">
           <span className="mx-auto mb-1 block h-[2px] w-6 bg-accent-warm" />
           {item}
         </li>
@@ -259,26 +259,26 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
         <Pagina rodape={rodape} numero={++n} total={total}>
           <Cabecalho />
           <h2 className="text-center font-display text-[14pt] font-semibold">Análise das atividades (CNAE)</h2>
-          <p className="mt-3 w-full text-center text-[10pt] leading-relaxed text-ink/80">
+          <p className="mt-3 w-full text-justify text-[10pt] leading-relaxed text-ink/80">
             Estas são as atividades registradas para a sua empresa, o que cada uma abrange e o anexo do Simples
             Nacional correspondente. O enquadramento define a alíquota do Simples e influencia diretamente o resultado
             das simulações apresentadas adiante.
           </p>
           <div className="mt-5 space-y-4">
             {estudo.cnaes.map((c) => (
-              <div key={c.id} className="border border-line bg-frost/60 px-4 py-3 text-center">
-                <p className="font-display text-[10.5pt] font-semibold">
+              <div key={c.id} className="border border-line bg-frost/60 px-4 py-3 text-justify">
+                <p className="text-center font-display text-[10.5pt] font-semibold">
                   {c.codigo} — {c.descricao}
                 </p>
-                <p className="mt-1 text-[8.5pt] uppercase tracking-[0.15em] text-accent-warm">{c.anexo}</p>
+                <p className="mt-1 text-center text-[8.5pt] uppercase tracking-[0.15em] text-accent-warm">{c.anexo}</p>
                 {c.compreende ? (
-                  <p className="mt-2 text-[9pt] leading-relaxed text-ink/80">
+                  <p className="mt-2 text-justify text-[9pt] leading-relaxed text-ink/80">
                     <span className="font-semibold">Compreende: </span>
                     {c.compreende}
                   </p>
                 ) : null}
                 {c.naoCompreende ? (
-                  <p className="mt-2 text-[9pt] leading-relaxed text-ink/70">
+                  <p className="mt-2 text-justify text-[9pt] leading-relaxed text-ink/70">
                     <span className="font-semibold">Não compreende: </span>
                     {c.naoCompreende}
                   </p>
@@ -296,7 +296,7 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
         <Paragrafos texto={d.prazos} />
 
         <Titulo>A análise que fizemos para você</Titulo>
-        <p className="mt-3 w-full text-center text-[10.5pt] leading-relaxed text-ink/85">
+        <p className="mt-3 w-full text-justify text-[10.5pt] leading-relaxed text-ink/85">
           Analisamos as vendas da sua empresa no ano-base de {d.anoBase}, somando {brlExato(faturamento)}. Veja como o
           seu faturamento se distribui entre os perfis de cliente e quanto de débito de CBS e IBS cada perfil
           representa:
@@ -315,7 +315,7 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
           }))}
         />
 
-        <p className="mt-6 w-full text-center text-[10.5pt] leading-relaxed text-ink/85">
+        <p className="mt-6 w-full text-justify text-[10.5pt] leading-relaxed text-ink/85">
           Também olhamos para as suas compras, que somam {brlExato(fornecedores.total)}. O perfil dos seus fornecedores
           define quanto de crédito a sua empresa poderá aproveitar no novo sistema:
         </p>
@@ -345,7 +345,7 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
             </div>
           ))}
         </div>
-        <p className="mt-4 text-center text-[8pt] italic leading-snug text-ink/55">
+        <p className="mt-4 text-justify text-[8pt] italic leading-snug text-ink/55">
           * Valores calculados com as alíquotas de referência de {pct(ALIQUOTA_IBS)} (IBS) e {pct(ALIQUOTA_CBS)} (CBS).
           Nas linhas de fornecedores do Simples Nacional, MEI e pessoa física os valores indicam o crédito que se
           perderia, e não integram o crédito efetivo. Hoje, {pct(participacaoNormal)} do seu faturamento vem de
@@ -403,7 +403,7 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
             </div>
           </>
         ) : (
-          <p className="mt-4 text-center text-[10pt] text-ink/70">Simulações ainda não importadas.</p>
+          <p className="mt-4 text-justify text-[10pt] text-ink/70">Simulações ainda não importadas.</p>
         )}
       </Pagina>
 
