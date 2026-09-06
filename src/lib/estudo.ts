@@ -60,12 +60,18 @@ export type Parceiro = {
   valor: number;
 };
 
+export type CenarioKey = "simplesAtual" | "simplesHibrido" | "lucroPresumido" | "lucroReal";
+
+export type TributoLinha = { nome: string; valor: number };
+
 export type Simulacoes = {
   simplesAtual: number[];
   simplesHibrido: number[];
   lucroPresumido: number[];
   lucroReal: number[];
+  tributos?: Partial<Record<CenarioKey, TributoLinha[]>>;
 };
+
 
 export type Diagnostico = {
   tituloCapa: string;
