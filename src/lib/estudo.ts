@@ -112,7 +112,7 @@ export const CENARIOS = [
   { key: "simplesHibrido", label: "Simples Nacional — modelo híbrido", fonte: "Detalhamento Simulação de Cálculo da Reforma Tributária · 2027" },
   { key: "lucroPresumido", label: "Lucro Presumido", fonte: "Consulta Planejamento Tributário · 2027" },
   { key: "lucroReal", label: "Lucro Real", fonte: "Consulta Planejamento Tributário · 2027" },
-] as const satisfies ReadonlyArray<{ key: keyof Simulacoes; label: string; fonte: string }>;
+] as const satisfies ReadonlyArray<{ key: CenarioKey; label: string; fonte: string }>;
 
 const zeros = () => Array.from({ length: 12 }, () => 0);
 
