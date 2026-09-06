@@ -36,7 +36,7 @@ export function SecaoFaturamento({
             <XAxis dataKey="mes" tick={{ fontSize: 11 }} />
             <YAxis tick={{ fontSize: 10 }} tickFormatter={(v: number) => `${Math.round(v / 1000)}k`} />
             <Tooltip formatter={(v: number) => brl(v)} />
-            <Area type="monotone" dataKey="valor" stroke="var(--color-brand)" strokeWidth={2} fill="url(#grad-fat)" />
+            <Area type="monotone" dataKey="valor" stroke="var(--color-brand)" strokeWidth={2} fill="url(#grad-fat)" isAnimationActive={false} />
           </AreaChart>
         </ResponsiveContainer>
       </div>
