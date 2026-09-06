@@ -95,10 +95,10 @@ export function SecaoSimulacoes({
             <YAxis tick={{ fontSize: 10 }} tickFormatter={(v: number) => `${Math.round(v / 1000)}k`} />
             <Tooltip formatter={(v: number) => brl(v)} />
             <Legend wrapperStyle={{ fontSize: 11 }} />
-            <Bar dataKey="Simples atual" fill={CORES.simplesAtual} />
-            <Bar dataKey="Simples híbrido" fill={CORES.simplesHibrido} />
-            <Bar dataKey="Lucro Presumido" fill={CORES.lucroPresumido} />
-            <Bar dataKey="Lucro Real" fill={CORES.lucroReal} />
+            <Bar dataKey="Simples atual" fill={CORES["simplesAtual"]} />
+            <Bar dataKey="Simples híbrido" fill={CORES["simplesHibrido"]} />
+            <Bar dataKey="Lucro Presumido" fill={CORES["lucroPresumido"]} />
+            <Bar dataKey="Lucro Real" fill={CORES["lucroReal"]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
