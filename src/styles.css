@@ -186,11 +186,27 @@
 }
 
 @media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
   .no-print {
     display: none !important;
   }
   body {
     background: white;
+  }
+  .pagina-doc {
+    break-after: page;
+    page-break-after: always;
+    box-shadow: none !important;
+    margin: 0 !important;
+    width: 210mm !important;
+    min-height: 297mm !important;
+  }
+  .pagina-doc:last-child {
+    break-after: auto;
+    page-break-after: auto;
   }
 }
 
