@@ -1,0 +1,39 @@
+import { useCallback, useEffect, useState } from "react";
+import { estudoExemplo, type Estudo } from "./estudo";
+
+const CHAVE = "estudo-simples-hibrido-v1";
+
+export function useEstudo() {
+  const [estudo, setEstudo] = useState<Estudo>(estudoExemplo);
+  const [carregado, setCarregado] = useState(false);
+
+  useEffect(() => {
+    try {
+      const bruto = window.localStorage.getItem(CHAVE);
+      if (bruto) setEstudo(JSON.parse(bruto) as Estudo);
+    } catch {
+      /* ignora dados inválidos */
+    }
+    setCarregado(true);
+  }, []);
+
+  useEffect(() => {
+    if (!carregado) return;
+    try {
+      window.localStorage.setItem(CHAVE, JSON.stringify(estudo));
+    } catch {
+      /* armazenamento indisponível */
+    }
+  }, [estudo, carregado]);
+
+  const atualizar = useCallback((patch: Partial<Estudo>) => {
+    setEstudo((atual) => ({ ...atual, ...patch }));
+  }, []);
+
+  const limpar = useCallback(() => {
+    window.localStorage.removeItem(CHAVE);
+    window.location.reload();
+  }, []);
+
+  return { estudo, setEstudo, atualizar, limpar, carregado };
+}
