@@ -52,7 +52,7 @@ export function SecaoDiagnostico({ diagnostico, onChange, onGerar }: Props) {
     >
       <p className="max-w-[70ch] text-sm text-ink/70">
         O documento segue a capa e o padrão institucional do escritório: capa, introdução sobre a reforma e o Simples
-        Híbrido, a análise de clientes e fornecedores com os dados deste estudo, a orientação e os próximos passos.
+        Híbrido, a análise das atividades (CNAE), a análise de clientes e fornecedores, as simulações tributárias e os próximos passos.
         Ajuste os textos abaixo e clique em <strong>Gerar documento</strong> para visualizar e salvar em PDF.
       </p>
 
@@ -84,31 +84,14 @@ export function SecaoDiagnostico({ diagnostico, onChange, onGerar }: Props) {
           multiline
         />
         <Campo rotulo="Prazos" valor={diagnostico.prazos} onChange={(v) => set({ prazos: v })} multiline />
-        <Campo
-          rotulo="Orientação (texto)"
-          valor={diagnostico.orientacao}
-          onChange={(v) => set({ orientacao: v })}
-          multiline
-        />
         <div className="lg:col-span-2">
           <Campo
-            rotulo="Título da orientação"
-            valor={diagnostico.orientacaoTitulo}
-            onChange={(v) => set({ orientacaoTitulo: v })}
+            rotulo="Próximos passos — preencher conforme o cliente (um por linha)"
+            valor={diagnostico.proximosPassos}
+            onChange={(v) => set({ proximosPassos: v })}
+            multiline
           />
         </div>
-        <Campo
-          rotulo="Próximos passos (um por linha)"
-          valor={diagnostico.proximosPassos}
-          onChange={(v) => set({ proximosPassos: v })}
-          multiline
-        />
-        <Campo
-          rotulo="Análise Tributária Completa (um item por linha)"
-          valor={diagnostico.pacote}
-          onChange={(v) => set({ pacote: v })}
-          multiline
-        />
         <div className="lg:col-span-2">
           <Campo
             rotulo="Frase de encerramento"
