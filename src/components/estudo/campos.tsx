@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { REGIMES, type Regime } from "@/lib/estudo";
 
@@ -13,14 +13,24 @@ type TextoProps = {
 export function CampoTexto({ valor, onChange, placeholder, className, multiline }: TextoProps) {
   const base =
     "w-full rounded-md bg-transparent px-2 py-1 text-sm outline-none transition-colors placeholder:text-muted-foreground/60 hover:bg-frost focus:bg-white focus:ring-2 focus:ring-primary/40";
+  const ref = useRef<HTMLTextAreaElement>(null);
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [valor, multiline]);
+
   if (multiline) {
     return (
       <textarea
+        ref={ref}
         value={valor}
-        rows={2}
+        rows={1}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        className={cn(base, "resize-y leading-snug", className)}
+        className={cn(base, "resize-none overflow-hidden leading-snug", className)}
       />
     );
   }
@@ -33,6 +43,7 @@ export function CampoTexto({ valor, onChange, placeholder, className, multiline 
     />
   );
 }
+
 
 type NumeroProps = {
   valor: number;

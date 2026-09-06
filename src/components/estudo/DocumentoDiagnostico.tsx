@@ -138,39 +138,41 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
     <div className="font-body text-ink">
       {/* Capa */}
       <Pagina semPadding>
-        <div className="flex flex-1 flex-col">
-          <div className="px-[18mm] pt-[16mm] text-center">
-            <p className="text-[9pt] uppercase tracking-[0.45em] text-brand">{d.tituloCapa}</p>
-            <span className="mx-auto mt-3 block h-[2px] w-16 bg-accent-warm" />
-            <img
-              src={logoLogica.url}
-              alt="Lógica na Reforma — da contabilidade à estratégia"
-              className="mx-auto mt-8 h-32 w-auto mix-blend-multiply"
-            />
-          </div>
-          <div className="relative mt-8">
-            <img src={capa} alt="" width={1280} height={860} className="h-[78mm] w-full object-cover" />
-            <div className="bg-accent-warm clip-bar px-[18mm] py-3">
-              <p className="font-display text-[15pt] font-semibold text-ink">{d.chamadaCapa}</p>
+        <div className="flex flex-1 flex-col border-[3px] border-accent-warm/70">
+          <div className="relative flex-1">
+            <img src={capa} alt="" width={1280} height={860} className="absolute inset-0 size-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-b from-white/95 via-white/70 to-white/10" />
+            <div className="relative flex h-full flex-col px-[16mm] pt-[14mm]">
+              <p className="text-center text-[9pt] uppercase tracking-[0.4em] text-accent-warm">{d.tituloCapa}</p>
+              <span className="mx-auto mt-2 block h-[2px] w-14 bg-accent-warm" />
+              <img
+                src={logoLogica.url}
+                alt="Lógica na Reforma — da contabilidade à estratégia"
+                className="mx-auto mt-10 h-40 w-auto mix-blend-multiply"
+              />
             </div>
           </div>
-          <div className="mt-8 px-[18mm] text-center">
-            <p className="text-[8pt] uppercase tracking-[0.35em] text-brand">{d.subtituloCapa}</p>
-            <h1 className="mt-2 font-display text-[17pt] font-semibold uppercase leading-tight">
+          <div className="bg-accent-warm px-[16mm] py-3">
+            <p className="text-center font-display text-[13pt] font-semibold text-white">{d.chamadaCapa}</p>
+          </div>
+          <div className="bg-frost px-[16mm] py-6 text-center">
+            <p className="text-[8pt] uppercase tracking-[0.35em] text-accent-warm">{d.subtituloCapa}</p>
+            <h1 className="mt-2 font-display text-[15pt] font-semibold uppercase leading-tight">
               {estudo.cadastro.razaoSocial}
             </h1>
-            <p className="mt-2 text-[10pt] text-ink/70">
+            <p className="mt-2 text-[9pt] text-ink/70">
               Ano-base {d.anoBase}
               {d.emitidoEm ? ` · Emitido em ${d.emitidoEm}` : ""}
             </p>
-            <p className="mt-1 text-[8.5pt] italic text-ink/50">{d.confidencial}</p>
-            <p className="mt-1 text-[8.5pt] text-ink/60">CNPJ {estudo.cadastro.cnpj}</p>
+            <p className="mt-1 text-[8pt] italic text-ink/50">{d.confidencial}</p>
+            <p className="mt-1 text-[8pt] text-ink/60">CNPJ {estudo.cadastro.cnpj}</p>
           </div>
-          <div className="mt-auto border-t border-line px-[18mm] py-5 text-center text-[9pt] text-ink/70">
+          <div className="border-t border-line bg-white px-[16mm] py-4 text-center text-[8.5pt] text-ink/70">
             {d.telefone} &nbsp;|&nbsp; {d.email} &nbsp;|&nbsp; {d.site}
           </div>
         </div>
       </Pagina>
+
 
       {/* Introdução */}
       <Pagina rodape={rodape} numero={2} total={5}>
@@ -179,6 +181,55 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
         <Paragrafos texto={d.introducao} />
         <h3 className="mt-8 font-display text-[12pt] font-semibold text-brand">O que muda com a Reforma Tributária</h3>
         <Paragrafos texto={d.oQueMuda} />
+
+        <h3 className="mt-8 font-display text-[12pt] font-semibold text-brand">
+          Simples tradicional e Simples Híbrido lado a lado
+        </h3>
+        <table className="mt-3 w-full border-collapse text-[9pt]">
+          <thead>
+            <tr className="bg-frost text-left">
+              <th className="border border-line px-2 py-1.5 font-display font-semibold">Como fica</th>
+              <th className="border border-line px-2 py-1.5 font-display font-semibold">Simples tradicional</th>
+              <th className="border border-line px-2 py-1.5 font-display font-semibold">Simples Híbrido</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              [
+                "CBS e IBS",
+                "Dentro da guia única do Simples, sem apuração separada",
+                "Apurados e recolhidos à parte, pelo regime regular",
+              ],
+              [
+                "Crédito repassado ao cliente",
+                "Limitado ao valor contido na guia do Simples",
+                "Crédito integral de CBS e IBS na nota",
+              ],
+              [
+                "Crédito sobre as compras",
+                "Não aproveita crédito das compras",
+                "Aproveita o crédito de fornecedores do regime regular",
+              ],
+              [
+                "Demais tributos (IRPJ, CSLL, CPP)",
+                "Permanecem no Simples",
+                "Permanecem no Simples",
+              ],
+              [
+                "Obrigações e controles",
+                "Mais simples, guia única",
+                "Exige controle de créditos e documentação fiscal das compras",
+              ],
+            ].map(([a, b, c]) => (
+              <tr key={a}>
+                <td className="border border-line px-2 py-1.5 font-medium">{a}</td>
+                <td className="border border-line px-2 py-1.5 text-ink/75">{b}</td>
+                <td className="border border-line px-2 py-1.5 text-ink/75">{c}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
         <div className="mt-8 border-l-4 border-accent-warm bg-frost px-4 py-3">
           <p className="font-display text-[10.5pt] font-semibold">Ponto de atenção: abrangência da análise</p>
           <p className="mt-2 text-[9.5pt] leading-relaxed text-ink/75">
