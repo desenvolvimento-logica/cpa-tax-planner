@@ -309,8 +309,10 @@ export function parseSimulacaoReforma(texto: string): Pick<Simulacoes, "simplesA
   };
 }
 
-/** Planejamento Tributário: linhas de Lucro Presumido e Lucro Real do ano de 2027. */
-export function parsePlanejamento(texto: string): Pick<Simulacoes, "lucroPresumido" | "lucroReal" | "tributos"> {
+/** Planejamento Tributário: Simples Híbrido, Lucro Presumido e Lucro Real do ano de 2027. */
+export function parsePlanejamento(
+  texto: string,
+): Pick<Simulacoes, "simplesHibrido" | "lucroPresumido" | "lucroReal" | "tributos"> {
   const pegar = (rotulo: RegExp) => {
     for (const linha of texto.split("\n")) {
       if (!rotulo.test(linha.trim())) continue;
@@ -338,15 +340,28 @@ export function parsePlanejamento(texto: string): Pick<Simulacoes, "lucroPresumi
     return itens;
   };
 
+  // O modelo híbrido corresponde à linha "Simples Nacional" do planejamento:
+  // Anexo do Simples (sem PIS/COFINS) + tributos apurados no regime regular (CBS/IBS).
+  const hibridoAnexo = tributosDe(/DETALHAMENTO SIMPLES NACIONAL \(ANEXO/i);
+  const hibridoRegular = tributosDe(/DETALHAMENTO SIMPLES NACIONAL - IMPOSTOS CALCULADOS NO REGIME REGULAR/i);
+  const somar = (itens: { nome: string; valor: number }[]) => {
+    const mapa = new Map<string, number>();
+    for (const it of itens) mapa.set(it.nome, (mapa.get(it.nome) ?? 0) + it.valor);
+    return [...mapa].map(([nome, valor]) => ({ nome, valor })).filter((t) => t.valor !== 0);
+  };
+
   return {
+    simplesHibrido: pegar(/^Simples Nacional\b/i),
     lucroPresumido: pegar(/^Lucro Presumido\b/i),
     lucroReal: pegar(/^Lucro Real\b/i),
     tributos: {
+      simplesHibrido: somar([...hibridoAnexo, ...hibridoRegular]),
       lucroPresumido: tributosDe(/DETALHAMENTO LUCRO PRESUMIDO/i),
       lucroReal: tributosDe(/DETALHAMENTO LUCRO REAL/i),
     },
   };
 }
+
 
 /** Consulta de CNAE: compreende / não compreende para um código. */
 export function parseCnae(texto: string): { codigo: string; compreende: string; naoCompreende: string; anexo: string } {
