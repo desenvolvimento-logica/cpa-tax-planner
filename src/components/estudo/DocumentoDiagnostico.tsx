@@ -403,7 +403,7 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
             </div>
           </>
         ) : (
-          <p className="mt-4 text-center text-[10pt] text-ink/70">Simulações ainda não importadas.</p>
+          <p className="mt-4 text-justify text-[10pt] text-ink/70">Simulações ainda não importadas.</p>
         )}
       </Pagina>
 
