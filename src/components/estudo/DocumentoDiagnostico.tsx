@@ -19,7 +19,7 @@ function Paragrafos({ texto, className }: { texto: string; className?: string })
         .map((l) => l.trim())
         .filter(Boolean)
         .map((linha, i) => (
-          <p key={i} className={className ?? "mt-3 text-[10.5pt] leading-relaxed text-ink/85"}>
+          <p key={i} className={className ?? "mt-3 text-center text-[10.5pt] leading-relaxed text-ink/85"}>
             {linha}
           </p>
         ))}
@@ -33,11 +33,11 @@ function Lista({ texto }: { texto: string }) {
     .map((l) => l.trim())
     .filter(Boolean);
   return (
-    <ul className="mt-3 space-y-2">
+    <ul className="mx-auto mt-3 max-w-[150mm] space-y-2">
       {itens.map((item, i) => (
-        <li key={i} className="flex gap-3 text-[10.5pt] leading-relaxed text-ink/85">
-          <span className="mt-[7px] inline-block size-1.5 shrink-0 bg-accent-warm" />
-          <span>{item}</span>
+        <li key={i} className="text-center text-[10.5pt] leading-relaxed text-ink/85">
+          <span className="mx-auto mb-1 block h-[2px] w-6 bg-accent-warm" />
+          {item}
         </li>
       ))}
     </ul>
@@ -85,34 +85,59 @@ function Cabecalho() {
   );
 }
 
+function Titulo({ children }: { children: React.ReactNode }) {
+  return <h3 className="mt-8 text-center font-display text-[12pt] font-semibold text-brand">{children}</h3>;
+}
+
 function TabelaPerfil({
   titulo,
-  linhas,
   colunaValor,
+  colunaCredito,
+  linhas,
 }: {
   titulo: string;
   colunaValor: string;
-  linhas: { perfil: string; participacao: number; valor: number; efeito: string }[];
+  colunaCredito: string;
+  linhas: { perfil: string; participacao: number; valor: number; ibs: number; cbs: number; efeito: string }[];
 }) {
+  const totalValor = linhas.reduce((a, b) => a + b.valor, 0);
+  const totalIbs = linhas.reduce((a, b) => a + b.ibs, 0);
+  const totalCbs = linhas.reduce((a, b) => a + b.cbs, 0);
   return (
-    <table className="mt-4 w-full border-collapse text-[9.5pt]">
+    <table className="mt-4 w-full border-collapse text-[9pt]">
       <thead>
-        <tr className="bg-frost text-left">
+        <tr className="bg-frost text-center">
           <th className="border border-line px-2 py-1.5 font-display font-semibold">{titulo}</th>
+          <th className="border border-line px-2 py-1.5 font-display font-semibold">%</th>
           <th className="border border-line px-2 py-1.5 font-display font-semibold">{colunaValor}</th>
-          <th className="border border-line px-2 py-1.5 font-display font-semibold">Valor</th>
-          <th className="border border-line px-2 py-1.5 font-display font-semibold">O que muda com a reforma</th>
+          <th className="border border-line px-2 py-1.5 font-display font-semibold">
+            IBS {pct(ALIQUOTA_IBS)}
+          </th>
+          <th className="border border-line px-2 py-1.5 font-display font-semibold">
+            CBS {pct(ALIQUOTA_CBS)}
+          </th>
+          <th className="border border-line px-2 py-1.5 font-display font-semibold">{colunaCredito}</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody className="text-center">
         {linhas.map((l) => (
           <tr key={l.perfil}>
             <td className="border border-line px-2 py-1.5">{l.perfil}</td>
             <td className="border border-line px-2 py-1.5">{pct(l.participacao)}</td>
             <td className="border border-line px-2 py-1.5">{brlExato(l.valor)}</td>
+            <td className="border border-line px-2 py-1.5">{brlExato(l.ibs)}</td>
+            <td className="border border-line px-2 py-1.5">{brlExato(l.cbs)}</td>
             <td className="border border-line px-2 py-1.5 text-ink/75">{l.efeito}</td>
           </tr>
         ))}
+        <tr className="bg-frost font-display font-semibold">
+          <td className="border border-line px-2 py-1.5">Total</td>
+          <td className="border border-line px-2 py-1.5">100,00%</td>
+          <td className="border border-line px-2 py-1.5">{brlExato(totalValor)}</td>
+          <td className="border border-line px-2 py-1.5">{brlExato(totalIbs)}</td>
+          <td className="border border-line px-2 py-1.5">{brlExato(totalCbs)}</td>
+          <td className="border border-line px-2 py-1.5" />
+        </tr>
       </tbody>
     </table>
   );
@@ -129,10 +154,15 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
     .filter((l) => l.geraCredito)
     .reduce((a, b) => a + b.participacao, 0);
 
-  const totaisCenarios = CENARIOS.map((c) => ({
-    label: c.label,
+  const cenarios = CENARIOS.map((c) => ({
+    ...c,
     total: soma(estudo.simulacoes[c.key]),
+    tributos: (estudo.simulacoes.tributos?.[c.key] ?? []).filter((t) => t.valor !== 0),
   })).filter((c) => c.total > 0);
+
+  const temCnaes = estudo.cnaes.length > 0;
+  const total = temCnaes ? 6 : 5;
+  let n = 1;
 
   return (
     <div className="font-body text-ink">
@@ -173,27 +203,24 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
         </div>
       </Pagina>
 
-
       {/* Introdução */}
-      <Pagina rodape={rodape} numero={2} total={5}>
+      <Pagina rodape={rodape} numero={++n} total={total}>
         <Cabecalho />
-        <h2 className="font-display text-[14pt] font-semibold">{d.saudacao}</h2>
+        <h2 className="text-center font-display text-[14pt] font-semibold">{d.saudacao}</h2>
         <Paragrafos texto={d.introducao} />
-        <h3 className="mt-8 font-display text-[12pt] font-semibold text-brand">O que muda com a Reforma Tributária</h3>
+        <Titulo>O que muda com a Reforma Tributária</Titulo>
         <Paragrafos texto={d.oQueMuda} />
 
-        <h3 className="mt-8 font-display text-[12pt] font-semibold text-brand">
-          Simples tradicional e Simples Híbrido lado a lado
-        </h3>
+        <Titulo>Simples tradicional e Simples Híbrido lado a lado</Titulo>
         <table className="mt-3 w-full border-collapse text-[9pt]">
           <thead>
-            <tr className="bg-frost text-left">
+            <tr className="bg-frost text-center">
               <th className="border border-line px-2 py-1.5 font-display font-semibold">Como fica</th>
               <th className="border border-line px-2 py-1.5 font-display font-semibold">Simples tradicional</th>
               <th className="border border-line px-2 py-1.5 font-display font-semibold">Simples Híbrido</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="text-center">
             {[
               [
                 "CBS e IBS",
@@ -210,11 +237,7 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
                 "Não aproveita crédito das compras",
                 "Aproveita o crédito de fornecedores do regime regular",
               ],
-              [
-                "Demais tributos (IRPJ, CSLL, CPP)",
-                "Permanecem no Simples",
-                "Permanecem no Simples",
-              ],
+              ["Demais tributos (IRPJ, CSLL, CPP)", "Permanecem no Simples", "Permanecem no Simples"],
               [
                 "Obrigações e controles",
                 "Mais simples, guia única",
@@ -229,58 +252,91 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
             ))}
           </tbody>
         </table>
-
-        <div className="mt-8 border-l-4 border-accent-warm bg-frost px-4 py-3">
-          <p className="font-display text-[10.5pt] font-semibold">Ponto de atenção: abrangência da análise</p>
-          <p className="mt-2 text-[9.5pt] leading-relaxed text-ink/75">
-            Esta análise foi elaborada com base nas informações e nos documentos fiscais regularmente registrados pela
-            empresa. Operações não acobertadas por documentos fiscais idôneos não integram esta avaliação e poderão
-            impactar as conclusões apresentadas.
-          </p>
-        </div>
       </Pagina>
 
+      {/* CNAEs */}
+      {temCnaes ? (
+        <Pagina rodape={rodape} numero={++n} total={total}>
+          <Cabecalho />
+          <h2 className="text-center font-display text-[14pt] font-semibold">Análise das atividades (CNAE)</h2>
+          <p className="mx-auto mt-3 max-w-[150mm] text-center text-[10pt] leading-relaxed text-ink/80">
+            Estas são as atividades registradas para a sua empresa, o que cada uma abrange e o anexo do Simples
+            Nacional correspondente. O enquadramento define a alíquota do Simples e influencia diretamente o resultado
+            das simulações apresentadas adiante.
+          </p>
+          <div className="mt-5 space-y-4">
+            {estudo.cnaes.map((c) => (
+              <div key={c.id} className="border border-line bg-frost/60 px-4 py-3 text-center">
+                <p className="font-display text-[10.5pt] font-semibold">
+                  {c.codigo} — {c.descricao}
+                </p>
+                <p className="mt-1 text-[8.5pt] uppercase tracking-[0.15em] text-accent-warm">{c.anexo}</p>
+                {c.compreende ? (
+                  <p className="mt-2 text-[9pt] leading-relaxed text-ink/80">
+                    <span className="font-semibold">Compreende: </span>
+                    {c.compreende}
+                  </p>
+                ) : null}
+                {c.naoCompreende ? (
+                  <p className="mt-2 text-[9pt] leading-relaxed text-ink/70">
+                    <span className="font-semibold">Não compreende: </span>
+                    {c.naoCompreende}
+                  </p>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </Pagina>
+      ) : null}
+
       {/* Prazos + análise */}
-      <Pagina rodape={rodape} numero={3} total={5}>
+      <Pagina rodape={rodape} numero={++n} total={total}>
         <Cabecalho />
-        <h3 className="font-display text-[12pt] font-semibold text-brand">Atenção ao prazo</h3>
+        <Titulo>Atenção ao prazo</Titulo>
         <Paragrafos texto={d.prazos} />
 
-        <h3 className="mt-8 font-display text-[12pt] font-semibold text-brand">A análise que fizemos para você</h3>
-        <p className="mt-3 text-[10.5pt] leading-relaxed text-ink/85">
+        <Titulo>A análise que fizemos para você</Titulo>
+        <p className="mx-auto mt-3 max-w-[150mm] text-center text-[10.5pt] leading-relaxed text-ink/85">
           Analisamos as vendas da sua empresa no ano-base de {d.anoBase}, somando {brlExato(faturamento)}. Veja como o
-          seu faturamento se distribui entre os perfis de cliente:
+          seu faturamento se distribui entre os perfis de cliente e quanto de débito de CBS e IBS cada perfil
+          representa:
         </p>
         <TabelaPerfil
           titulo="Perfil do cliente"
-          colunaValor="% do faturamento"
+          colunaValor="Faturamento"
+          colunaCredito="Efeito com a reforma"
           linhas={clientes.linhas.map((l) => ({
             perfil: l.regime,
             participacao: l.participacao,
             valor: l.valor,
-            efeito: l.geraCredito ? "Passará a exigir crédito de CBS/IBS" : "Não exige crédito de CBS/IBS",
+            ibs: l.ibsPotencial,
+            cbs: l.cbsPotencial,
+            efeito: l.geraCredito ? "Passará a exigir crédito integral" : "Não aproveita crédito",
           }))}
         />
 
-        <p className="mt-6 text-[10.5pt] leading-relaxed text-ink/85">
+        <p className="mx-auto mt-6 max-w-[150mm] text-center text-[10.5pt] leading-relaxed text-ink/85">
           Também olhamos para as suas compras, que somam {brlExato(fornecedores.total)}. O perfil dos seus fornecedores
-          influencia o quanto a sua empresa poderá aproveitar de créditos no novo sistema:
+          define quanto de crédito a sua empresa poderá aproveitar no novo sistema:
         </p>
         <TabelaPerfil
           titulo="Perfil do fornecedor"
-          colunaValor="% das compras"
+          colunaValor="Compras"
+          colunaCredito="Efeito com a reforma"
           linhas={fornecedores.linhas.map((l) => ({
             perfil: l.regime,
             participacao: l.participacao,
             valor: l.valor,
-            efeito: l.geraCredito ? "Gera crédito de CBS/IBS" : "Não gera crédito de CBS/IBS",
+            ibs: l.ibsPotencial,
+            cbs: l.cbsPotencial,
+            efeito: l.geraCredito ? "Gera crédito de CBS/IBS" : "Sem direito a crédito",
           }))}
         />
 
-        <div className="mt-6 grid grid-cols-3 gap-3">
+        <div className="mt-6 grid grid-cols-3 gap-3 text-center">
           {[
-            { r: "Crédito estimado de IBS (18,70%)", v: brlExato(fornecedores.totalIbs) },
-            { r: "Crédito estimado de CBS (9,21%)", v: brlExato(fornecedores.totalCbs) },
+            { r: "Crédito efetivo de IBS", v: brlExato(fornecedores.totalIbs) },
+            { r: "Crédito efetivo de CBS", v: brlExato(fornecedores.totalCbs) },
             { r: "Compras sem direito a crédito", v: brlExato(fornecedores.totalSemCredito) },
           ].map((c) => (
             <div key={c.r} className="border border-line bg-frost px-3 py-3">
@@ -289,72 +345,81 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
             </div>
           ))}
         </div>
-        <p className="mt-4 text-[8pt] italic leading-snug text-ink/55">
-          * Créditos estimados com as alíquotas de referência de {pct(ALIQUOTA_IBS)} (IBS) e {pct(ALIQUOTA_CBS)} (CBS).
-          Alterações relevantes no perfil de clientes ou fornecedores exigem reavaliação da análise.
+        <p className="mt-4 text-center text-[8pt] italic leading-snug text-ink/55">
+          * Valores calculados com as alíquotas de referência de {pct(ALIQUOTA_IBS)} (IBS) e {pct(ALIQUOTA_CBS)} (CBS).
+          Nas linhas de fornecedores do Simples Nacional, MEI e pessoa física os valores indicam o crédito que se
+          perderia, e não integram o crédito efetivo. Hoje, {pct(participacaoNormal)} do seu faturamento vem de
+          clientes que passarão a exigir crédito integral de CBS e IBS.
         </p>
       </Pagina>
 
-      {/* Orientação */}
-      <Pagina rodape={rodape} numero={4} total={5}>
+      {/* Simulações */}
+      <Pagina rodape={rodape} numero={++n} total={total}>
         <Cabecalho />
-        <h2 className="font-display text-[14pt] font-semibold">Nossa orientação para a sua empresa</h2>
-        <div className="mt-4 border-l-4 border-accent-warm bg-frost px-4 py-3">
-          <p className="font-display text-[11.5pt] font-semibold">{d.orientacaoTitulo}</p>
-        </div>
-        <Paragrafos texto={d.orientacao} />
-        <p className="mt-3 text-[10.5pt] leading-relaxed text-ink/85">
-          Hoje, {pct(participacaoNormal)} do seu faturamento vem de clientes que passarão a exigir crédito integral de
-          CBS e IBS.
-        </p>
-
-        {totaisCenarios.length > 0 ? (
+        <h2 className="text-center font-display text-[14pt] font-semibold">Simulações tributárias · cenário 2027</h2>
+        {cenarios.length > 0 ? (
           <>
-            <h3 className="mt-8 font-display text-[12pt] font-semibold text-brand">
-              Simulações tributárias · cenário 2027
-            </h3>
-            <table className="mt-3 w-full border-collapse text-[9.5pt]">
+            <table className="mt-4 w-full border-collapse text-[9.5pt]">
               <thead>
-                <tr className="bg-frost text-left">
+                <tr className="bg-frost text-center">
                   <th className="border border-line px-2 py-1.5 font-display font-semibold">Cenário</th>
                   <th className="border border-line px-2 py-1.5 font-display font-semibold">Carga total projetada</th>
+                  <th className="border border-line px-2 py-1.5 font-display font-semibold">% do faturamento</th>
                 </tr>
               </thead>
-              <tbody>
-                {totaisCenarios.map((c) => (
-                  <tr key={c.label}>
+              <tbody className="text-center">
+                {cenarios.map((c) => (
+                  <tr key={c.key}>
                     <td className="border border-line px-2 py-1.5">{c.label}</td>
                     <td className="border border-line px-2 py-1.5">{brlExato(c.total)}</td>
+                    <td className="border border-line px-2 py-1.5">
+                      {faturamento > 0 ? pct(c.total / faturamento) : "—"}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+
+            <Titulo>Composição por tributo · total do ano</Titulo>
+            <div className="mt-3 grid grid-cols-2 gap-3">
+              {cenarios.map((c) => (
+                <div key={c.key} className="border border-line bg-frost/60 px-3 py-3 text-center">
+                  <p className="text-[8.5pt] uppercase tracking-wide text-ink/55">{c.label}</p>
+                  <p className="mt-1 font-display text-[12pt] font-semibold">{brlExato(c.total)}</p>
+                  {c.tributos.length > 0 ? (
+                    <ul className="mt-2 space-y-1 text-[8.5pt]">
+                      {c.tributos.map((t) => (
+                        <li key={t.nome} className="flex items-baseline justify-between gap-2 text-left">
+                          <span className="text-ink/70">{t.nome}</span>
+                          <span className="font-medium tabular-nums">{brlExato(t.valor)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="mt-2 text-[8.5pt] text-ink/55">Detalhamento por tributo não disponível.</p>
+                  )}
+                </div>
+              ))}
+            </div>
           </>
-        ) : null}
-
-        <h3 className="mt-8 font-display text-[12pt] font-semibold text-brand">Próximos passos</h3>
-        <Lista texto={d.proximosPassos} />
-
-        <h3 className="mt-6 font-display text-[12pt] font-semibold text-brand">Análise Tributária Completa</h3>
-        <Lista texto={d.pacote} />
+        ) : (
+          <p className="mt-4 text-center text-[10pt] text-ink/70">Simulações ainda não importadas.</p>
+        )}
       </Pagina>
 
       {/* Encerramento */}
-      <Pagina rodape={rodape} numero={5} total={5}>
+      <Pagina rodape={rodape} numero={++n} total={total}>
         <Cabecalho />
-        <div className="flex flex-1 flex-col items-center justify-center text-center">
-          <p className="font-display text-[13pt] font-semibold">
-            Tem interesse em seguir com a Análise Tributária Completa?
-          </p>
-          <p className="mt-4 max-w-[120mm] text-[10.5pt] leading-relaxed text-ink/80">
-            Entre em contato com o nosso escritório para que possamos apresentar todos os detalhes, valores e prazos.
-          </p>
-          <p className="mt-4 text-[11pt] font-medium">
+        <h2 className="text-center font-display text-[14pt] font-semibold">Próximos passos</h2>
+        <Lista texto={d.proximosPassos} />
+
+        <div className="mt-auto flex flex-col items-center text-center">
+          <p className="text-[11pt] font-medium">
             {d.telefone} · {d.email}
           </p>
-          <span className="mt-10 block h-[3px] w-24 bg-accent-warm" />
-          <p className="mt-10 max-w-[130mm] font-display text-[13pt] leading-snug text-ink/85">{d.encerramento}</p>
-          <img src={logoLogica.url} alt="Lógica" className="mt-12 h-16 w-auto mix-blend-multiply" />
+          <span className="mt-8 block h-[3px] w-24 bg-accent-warm" />
+          <p className="mt-8 max-w-[130mm] font-display text-[13pt] leading-snug text-ink/85">{d.encerramento}</p>
+          <img src={logoLogica.url} alt="Lógica" className="mt-10 h-16 w-auto mix-blend-multiply" />
         </div>
       </Pagina>
     </div>
