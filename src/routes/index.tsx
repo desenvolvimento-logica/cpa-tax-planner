@@ -4,6 +4,8 @@ import { SecaoCadastro, SecaoCnaes } from "@/components/estudo/SecaoCadastro";
 import { SecaoFaturamento } from "@/components/estudo/SecaoFaturamento";
 import { SecaoParceiros } from "@/components/estudo/SecaoParceiros";
 import { SecaoSimulacoes } from "@/components/estudo/SecaoSimulacoes";
+import { SecaoDiagnostico } from "@/components/estudo/SecaoDiagnostico";
+import { DocumentoDiagnostico } from "@/components/estudo/DocumentoDiagnostico";
 import { CampoTexto } from "@/components/estudo/campos";
 import logoLogica from "@/assets/logica-na-reforma.jpg.asset.json";
 import { estudoVazio } from "@/lib/estudo";
@@ -38,16 +40,45 @@ const ETAPAS = [
   { id: "faturamento", numero: "03", nome: "Faturamento" },
   { id: "regimes", numero: "04", nome: "Regimes" },
   { id: "simulacao", numero: "05", nome: "Simulação" },
+  { id: "diagnostico", numero: "06", nome: "Diagnóstico" },
 ];
 
 function Index() {
   const { estudo, setEstudo, atualizar } = useEstudo();
   const [etapa, setEtapa] = useState("cadastro");
+  const [documentoAberto, setDocumentoAberto] = useState(false);
 
   const irPara = (id: string) => {
     setEtapa(id);
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
+
+  if (documentoAberto) {
+    return (
+      <div className="min-h-screen w-full bg-mist py-8">
+        <div className="no-print sticky top-0 z-10 mx-auto mb-6 flex max-w-[210mm] items-center justify-between gap-3 rounded-full bg-white/90 px-5 py-3 shadow-sm ring-1 ring-line backdrop-blur">
+          <p className="font-display text-sm font-semibold">Diagnóstico — pré-visualização</p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setDocumentoAberto(false)}
+              className="rounded-full px-4 py-2 text-sm font-medium text-ink/70 ring-1 ring-line transition-colors hover:bg-frost"
+            >
+              Voltar ao estudo
+            </button>
+            <button
+              type="button"
+              onClick={() => window.print()}
+              className="rounded-full bg-ink px-5 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+            >
+              Salvar em PDF
+            </button>
+          </div>
+        </div>
+        <DocumentoDiagnostico estudo={estudo} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-mist font-body text-ink antialiased">
@@ -105,7 +136,7 @@ function Index() {
             </div>
           </div>
 
-          <nav className="no-print mt-8 grid grid-cols-2 gap-2 sm:grid-cols-5">
+          <nav className="no-print mt-8 grid grid-cols-2 gap-2 sm:grid-cols-6">
             {ETAPAS.map((e) => (
               <button
                 key={e.id}
@@ -155,6 +186,17 @@ function Index() {
               simulacoes={estudo.simulacoes}
               faturamento={estudo.faturamento}
               onChange={(simulacoes) => atualizar({ simulacoes })}
+            />
+          </div>
+
+          <div id="diagnostico" className="min-w-0 scroll-mt-6">
+            <SecaoDiagnostico
+              diagnostico={estudo.diagnostico}
+              onChange={(diagnostico) => atualizar({ diagnostico })}
+              onGerar={() => {
+                setDocumentoAberto(true);
+                window.scrollTo({ top: 0 });
+              }}
             />
           </div>
 

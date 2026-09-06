@@ -67,6 +67,28 @@ export type Simulacoes = {
   lucroReal: number[];
 };
 
+export type Diagnostico = {
+  tituloCapa: string;
+  chamadaCapa: string;
+  subtituloCapa: string;
+  anoBase: string;
+  emitidoEm: string;
+  confidencial: string;
+  telefone: string;
+  email: string;
+  site: string;
+  endereco: string;
+  saudacao: string;
+  introducao: string;
+  oQueMuda: string;
+  prazos: string;
+  orientacaoTitulo: string;
+  orientacao: string;
+  proximosPassos: string;
+  pacote: string;
+  encerramento: string;
+};
+
 export type Estudo = {
   escritorio: string;
   cadastro: Cadastro;
@@ -76,6 +98,7 @@ export type Estudo = {
   clientes: Parceiro[];
   simulacoes: Simulacoes;
   observacoes: string;
+  diagnostico: Diagnostico;
 };
 
 export const CENARIOS = [
@@ -86,6 +109,37 @@ export const CENARIOS = [
 ] as const satisfies ReadonlyArray<{ key: keyof Simulacoes; label: string; fonte: string }>;
 
 const zeros = () => Array.from({ length: 12 }, () => 0);
+
+
+export const diagnosticoPadrao: Diagnostico = {
+  tituloCapa: "Orientação exclusiva ao cliente",
+  chamadaCapa: "Diagnóstico preliminar de orientação ao cliente",
+  subtituloCapa: "Preparado para",
+  anoBase: "2026",
+  emitidoEm: "",
+  confidencial: "Documento confidencial — uso exclusivo do destinatário",
+  telefone: "(19) 3825-5196",
+  email: "tributario@escritoriologica.com.br",
+  site: "escritoriologica.cnt.br",
+  endereco:
+    "Av. Eng. Fábio Roberto Barnabé, 1942 — Jd. Esplanada — Indaiatuba/SP — 13.331-520",
+  saudacao: "Olá, cliente amigo.",
+  introducao:
+    "Você certamente já ouviu falar da Reforma Tributária — a maior mudança do sistema de impostos do Brasil nas últimas décadas. Ela substitui gradualmente os tributos atuais por dois novos, a CBS e o IBS, e muda a forma como as empresas se relacionam entre si na hora de comprar e vender.\n\nAqui na Lógica, nós não esperamos as mudanças chegarem: nos antecipamos a elas. Por isso, analisamos os dados fiscais da sua empresa e preparamos este diagnóstico exclusivo — um cuidado a mais com quem confia o seu negócio a nós, para que você tome decisões com tranquilidade e antes dos prazos apertarem.\n\nNas próximas páginas, você vai entender o que a reforma significa para o perfil da sua empresa, o que encontramos na análise e qual é a nossa orientação.",
+  oQueMuda:
+    "Com a CBS e o IBS, o Brasil passa a adotar um sistema de créditos amplo: cada empresa do chamado Regime Normal desconta, dos impostos que deve, o valor dos tributos pagos nas suas compras. Na prática, essas empresas passarão a dar preferência a fornecedores que conseguem transferir esse crédito integralmente.\n\nPara quem está no Simples Nacional, surge uma decisão estratégica: permanecer no formato tradicional (recolhimento único e simplificado, porém sem transferência integral de crédito) ou adotar o Simples Nacional Híbrido, em que a CBS e o IBS passam a ser apurados separadamente, permitindo repassar o crédito cheio aos clientes.\n\nNão existe resposta única: o melhor caminho depende de quem são os seus clientes e fornecedores — e foi exatamente isso que analisamos para você.",
+  prazos:
+    "A janela inicial para a opção pelo Simples Nacional Híbrido é setembro de 2026. O tempo para analisar, simular e decidir é limitado.\n\nCaso a empresa opte pela inclusão e precise reverter a decisão, o cancelamento nessa primeira fase poderá ser feito até novembro de 2026. Depois desse período, a permanência no regime poderá ser reavaliada trimestralmente.",
+  orientacaoTitulo: "Nossa orientação: é aconselhável a mudança para o Simples Nacional Híbrido",
+  orientacao:
+    "A análise mostrou que a maior parte do faturamento da sua empresa vem de clientes do Regime Normal — empresas que, com a reforma, passarão a dar preferência a fornecedores capazes de transferir o crédito integral de CBS e IBS.\n\nDiante desse cenário, é aconselhável a mudança para o Simples Nacional Híbrido, acompanhada da simulação tributária prévia, para que a empresa se programe com antecedência diante do impacto financeiro da decisão.",
+  proximosPassos:
+    "Avaliar, com base neste diagnóstico, a importância dos clientes do Regime Normal para o seu faturamento e a necessidade de manter a competitividade junto a eles.\nConsiderar a Análise Tributária Completa, que inclui as simulações necessárias para a empresa se programar com o impacto financeiro da migração.\nLembrar dos prazos: setembro de 2026 para a inclusão no Simples Híbrido e novembro de 2026 para o cancelamento inicial — depois disso, a reavaliação passa a ser trimestral.",
+  pacote:
+    "Simulações tributárias completas, comparando o Simples Nacional tradicional, o Simples Híbrido, o Lucro Presumido e o Lucro Real, com valores projetados de CBS e IBS.\nOrientações personalizadas para cada decisão da empresa diante da reforma.\nAnálises detalhadas das informações fiscais — clientes, fornecedores e operações.\nInclusão ou cancelamento da empresa no modelo híbrido, com todo o processo conduzido pela nossa equipe.",
+  encerramento:
+    "A reforma tributária não precisa ser um problema. Com a orientação certa, ela se torna uma oportunidade.",
+};
 
 export const estudoVazio: Estudo = {
   escritorio: "Nome do escritório contábil",
@@ -111,6 +165,7 @@ export const estudoVazio: Estudo = {
     lucroReal: zeros(),
   },
   observacoes: "",
+  diagnostico: diagnosticoPadrao,
 };
 
 export const estudoExemplo: Estudo = {
@@ -251,7 +306,7 @@ export const estudoExemplo: Estudo = {
   },
   observacoes:
     "Dados cadastrais conforme Comprovante de Inscrição CNPJ emitido em 06/09/2026. Faturamento e perfil tributário de clientes e fornecedores referentes ao período de 01/01/2026 a 31/07/2026. Alíquotas de referência para 2027: IBS 18,70% e CBS 9,21%. Simples Nacional atual e modelo híbrido extraídos do Detalhamento Simulação de Cálculo da Reforma Tributária (1ª Fase 2027); Lucro Presumido e Lucro Real extraídos da Consulta Planejamento Tributário (ano 2027). Meses sem movimento permanecem zerados por ausência de dados no período.",
-
+  diagnostico: { ...diagnosticoPadrao, emitidoEm: "06 de setembro de 2026" },
 };
 
 

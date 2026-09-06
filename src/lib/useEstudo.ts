@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
-import { estudoExemplo, type Estudo } from "./estudo";
+import { diagnosticoPadrao, estudoExemplo, type Estudo } from "./estudo";
 
-const CHAVE = "estudo-jgwebcom-v3";
+const CHAVE = "estudo-jgwebcom-v4";
 
 export function useEstudo() {
   const [estudo, setEstudo] = useState<Estudo>(estudoExemplo);
@@ -10,7 +10,14 @@ export function useEstudo() {
   useEffect(() => {
     try {
       const bruto = window.localStorage.getItem(CHAVE);
-      if (bruto) setEstudo(JSON.parse(bruto) as Estudo);
+      if (bruto) {
+        const salvo = JSON.parse(bruto) as Estudo;
+        setEstudo({
+          ...estudoExemplo,
+          ...salvo,
+          diagnostico: { ...diagnosticoPadrao, ...(salvo.diagnostico ?? {}) },
+        });
+      }
     } catch {
       /* ignora dados inválidos */
     }
