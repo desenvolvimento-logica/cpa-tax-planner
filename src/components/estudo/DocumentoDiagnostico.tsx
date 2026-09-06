@@ -259,7 +259,7 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
         <Pagina rodape={rodape} numero={++n} total={total}>
           <Cabecalho />
           <h2 className="text-center font-display text-[14pt] font-semibold">Análise das atividades (CNAE)</h2>
-          <p className="mx-auto mt-3 max-w-[150mm] text-center text-[10pt] leading-relaxed text-ink/80">
+          <p className="mt-3 w-full text-center text-[10pt] leading-relaxed text-ink/80">
             Estas são as atividades registradas para a sua empresa, o que cada uma abrange e o anexo do Simples
             Nacional correspondente. O enquadramento define a alíquota do Simples e influencia diretamente o resultado
             das simulações apresentadas adiante.
@@ -296,7 +296,7 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
         <Paragrafos texto={d.prazos} />
 
         <Titulo>A análise que fizemos para você</Titulo>
-        <p className="mx-auto mt-3 max-w-[150mm] text-center text-[10.5pt] leading-relaxed text-ink/85">
+        <p className="mt-3 w-full text-center text-[10.5pt] leading-relaxed text-ink/85">
           Analisamos as vendas da sua empresa no ano-base de {d.anoBase}, somando {brlExato(faturamento)}. Veja como o
           seu faturamento se distribui entre os perfis de cliente e quanto de débito de CBS e IBS cada perfil
           representa:
@@ -315,7 +315,7 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
           }))}
         />
 
-        <p className="mx-auto mt-6 max-w-[150mm] text-center text-[10.5pt] leading-relaxed text-ink/85">
+        <p className="mt-6 w-full text-center text-[10.5pt] leading-relaxed text-ink/85">
           Também olhamos para as suas compras, que somam {brlExato(fornecedores.total)}. O perfil dos seus fornecedores
           define quanto de crédito a sua empresa poderá aproveitar no novo sistema:
         </p>
@@ -413,12 +413,12 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
         <h2 className="text-center font-display text-[14pt] font-semibold">Próximos passos</h2>
         <Lista texto={d.proximosPassos} />
 
-        <div className="mt-auto flex flex-col items-center text-center">
-          <p className="text-[11pt] font-medium">
+        <div className="mt-auto flex w-full flex-col items-center text-center">
+          <p className="w-full text-[11pt] font-medium">
             {d.telefone} · {d.email}
           </p>
           <span className="mt-8 block h-[3px] w-24 bg-accent-warm" />
-          <p className="mt-8 max-w-[130mm] font-display text-[13pt] leading-snug text-ink/85">{d.encerramento}</p>
+          <p className="mt-8 w-full font-display text-[13pt] leading-snug text-ink/85">{d.encerramento}</p>
           <img src={logoLogica.url} alt="Lógica" className="mt-10 h-16 w-auto mix-blend-multiply" />
         </div>
       </Pagina>
