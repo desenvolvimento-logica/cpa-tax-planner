@@ -118,7 +118,7 @@ export function Painel({
   className?: string;
 }) {
   return (
-    <section className={cn("painel clip-tilt p-6", className)}>
+    <section className={cn("painel clip-tilt min-w-0 p-6", className)}>
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <h2 className="font-display text-sm font-semibold uppercase tracking-widest text-brand">
           {numero ? `${numero} · ` : ""}

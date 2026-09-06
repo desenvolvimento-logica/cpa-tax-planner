@@ -119,16 +119,16 @@ function Index() {
         </header>
 
         <main className="relative mx-auto grid max-w-7xl gap-5 px-6 pb-16">
-          <div id="cadastro" className="scroll-mt-6">
+          <div id="cadastro" className="min-w-0 scroll-mt-6">
             <SecaoCadastro cadastro={estudo.cadastro} onChange={(cadastro) => atualizar({ cadastro })} />
           </div>
-          <div id="cnaes" className="scroll-mt-6">
+          <div id="cnaes" className="min-w-0 scroll-mt-6">
             <SecaoCnaes cnaes={estudo.cnaes} onChange={(cnaes) => atualizar({ cnaes })} />
           </div>
-          <div id="faturamento" className="scroll-mt-6">
+          <div id="faturamento" className="min-w-0 scroll-mt-6">
             <SecaoFaturamento valores={estudo.faturamento} onChange={(faturamento) => atualizar({ faturamento })} />
           </div>
-          <div id="regimes" className="grid scroll-mt-6 gap-5">
+          <div id="regimes" className="grid min-w-0 scroll-mt-6 gap-5">
             <SecaoParceiros
               numero="04a"
               tipo="fornecedores"
@@ -142,7 +142,7 @@ function Index() {
               onChange={(clientes) => atualizar({ clientes })}
             />
           </div>
-          <div id="simulacao" className="scroll-mt-6">
+          <div id="simulacao" className="min-w-0 scroll-mt-6">
             <SecaoSimulacoes
               simulacoes={estudo.simulacoes}
               faturamento={estudo.faturamento}
