@@ -345,7 +345,7 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
             </div>
           ))}
         </div>
-        <p className="mt-4 text-center text-[8pt] italic leading-snug text-ink/55">
+        <p className="mt-4 text-justify text-[8pt] italic leading-snug text-ink/55">
           * Valores calculados com as alíquotas de referência de {pct(ALIQUOTA_IBS)} (IBS) e {pct(ALIQUOTA_CBS)} (CBS).
           Nas linhas de fornecedores do Simples Nacional, MEI e pessoa física os valores indicam o crédito que se
           perderia, e não integram o crédito efetivo. Hoje, {pct(participacaoNormal)} do seu faturamento vem de
