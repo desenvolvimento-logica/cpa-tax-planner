@@ -315,7 +315,7 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
           }))}
         />
 
-        <p className="mt-6 w-full text-center text-[10.5pt] leading-relaxed text-ink/85">
+        <p className="mt-6 w-full text-justify text-[10.5pt] leading-relaxed text-ink/85">
           Também olhamos para as suas compras, que somam {brlExato(fornecedores.total)}. O perfil dos seus fornecedores
           define quanto de crédito a sua empresa poderá aproveitar no novo sistema:
         </p>
