@@ -150,7 +150,11 @@ export function parseCnpj(texto: string): { cadastro: Partial<Cadastro>; cnaes: 
   const razaoSocial = depoisDe(linhas, "NOME EMPRESARIAL");
   const fantasiaLinha = depoisDe(linhas, "NOME DE FANTASIA");
   const partesFantasia = fantasiaLinha.split(/\s{2,}/);
-  const abertura = texto.match(/DATA DE ABERTURA[\s\S]{0,120}?(\d{2}\/\d{2}\/\d{4})/i)?.[1] ?? "";
+  const abertura =
+    texto.match(/DATA DE ABERTURA[\s\S]{0,400}?(\d{2}\/\d{2}\/\d{4})/i)?.[1] ??
+    texto.match(/\d{2}\/\d{2}\/\d{4}/)?.[0] ??
+    "";
+
   const natureza = depoisDe(linhas, "DESCRIÇÃO DA NATUREZA JUR");
   const situacaoLinha = depoisDe(linhas, "SITUAÇÃO CADASTRAL\n") || depoisDe(linhas, "MOTIVO DE SITUAÇÃO");
   const situacao = /ATIVA|BAIXADA|SUSPENSA|INAPTA/i.exec(texto)?.[0] ?? situacaoLinha;
