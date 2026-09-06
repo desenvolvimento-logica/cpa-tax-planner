@@ -266,19 +266,19 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
           </p>
           <div className="mt-5 space-y-4">
             {estudo.cnaes.map((c) => (
-              <div key={c.id} className="border border-line bg-frost/60 px-4 py-3 text-center">
-                <p className="font-display text-[10.5pt] font-semibold">
+              <div key={c.id} className="border border-line bg-frost/60 px-4 py-3 text-justify">
+                <p className="text-center font-display text-[10.5pt] font-semibold">
                   {c.codigo} — {c.descricao}
                 </p>
-                <p className="mt-1 text-[8.5pt] uppercase tracking-[0.15em] text-accent-warm">{c.anexo}</p>
+                <p className="mt-1 text-center text-[8.5pt] uppercase tracking-[0.15em] text-accent-warm">{c.anexo}</p>
                 {c.compreende ? (
-                  <p className="mt-2 text-[9pt] leading-relaxed text-ink/80">
+                  <p className="mt-2 text-justify text-[9pt] leading-relaxed text-ink/80">
                     <span className="font-semibold">Compreende: </span>
                     {c.compreende}
                   </p>
                 ) : null}
                 {c.naoCompreende ? (
-                  <p className="mt-2 text-[9pt] leading-relaxed text-ink/70">
+                  <p className="mt-2 text-justify text-[9pt] leading-relaxed text-ink/70">
                     <span className="font-semibold">Não compreende: </span>
                     {c.naoCompreende}
                   </p>
