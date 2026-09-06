@@ -359,48 +359,91 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
         <h2 className="text-center font-display text-[14pt] font-semibold">Simulações tributárias · cenário 2027</h2>
         {cenarios.length > 0 ? (
           <>
-            <table className="mt-4 w-full border-collapse text-[9.5pt]">
+            <table className="mt-4 w-full border-collapse text-[8.5pt]">
               <thead>
                 <tr className="bg-frost text-center">
-                  <th className="border border-line px-2 py-1.5 font-display font-semibold">Cenário</th>
-                  <th className="border border-line px-2 py-1.5 font-display font-semibold">Carga total projetada</th>
-                  <th className="border border-line px-2 py-1.5 font-display font-semibold">% do faturamento</th>
+                  <th className="border border-line px-2 py-1.5 font-display font-semibold">Indicador</th>
+                  {cenarios.map((c) => (
+                    <th key={c.key} className="border border-line px-2 py-1.5 font-display font-semibold">
+                      {c.label}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody className="text-center">
-                {cenarios.map((c) => (
-                  <tr key={c.key}>
-                    <td className="border border-line px-2 py-1.5">{c.label}</td>
-                    <td className="border border-line px-2 py-1.5">{brlExato(c.total)}</td>
-                    <td className="border border-line px-2 py-1.5">
+                <tr>
+                  <td className="border border-line px-2 py-1.5 font-medium">Carga total projetada</td>
+                  {cenarios.map((c) => (
+                    <td key={c.key} className="border border-line px-2 py-1.5 font-display font-semibold">
+                      {brlExato(c.total)}
+                    </td>
+                  ))}
+                </tr>
+                <tr>
+                  <td className="border border-line px-2 py-1.5 font-medium">% do faturamento</td>
+                  {cenarios.map((c) => (
+                    <td key={c.key} className="border border-line px-2 py-1.5">
                       {faturamento > 0 ? pct(c.total / faturamento) : "—"}
                     </td>
-                  </tr>
-                ))}
+                  ))}
+                </tr>
+                <tr>
+                  <td className="border border-line px-2 py-1.5 font-medium">Diferença vs. Simples atual</td>
+                  {cenarios.map((c) => {
+                    const base = cenarios.find((x) => x.key === "simplesAtual")?.total ?? 0;
+                    const diff = c.total - base;
+                    if (c.key === "simplesAtual") {
+                      return <td key={c.key} className="border border-line px-2 py-1.5 text-ink/50">—</td>;
+                    }
+                    return (
+                      <td
+                        key={c.key}
+                        className={`border border-line px-2 py-1.5 font-medium ${diff > 0 ? "text-destructive" : "text-brand"}`}
+                      >
+                        {diff > 0 ? "+" : ""}
+                        {brlExato(diff)}
+                      </td>
+                    );
+                  })}
+                </tr>
               </tbody>
             </table>
 
             <Titulo>Composição por tributo · total do ano</Titulo>
-            <div className="mt-3 grid grid-cols-2 gap-3">
-              {cenarios.map((c) => (
-                <div key={c.key} className="border border-line bg-frost/60 px-3 py-3 text-center">
-                  <p className="text-[8.5pt] uppercase tracking-wide text-ink/55">{c.label}</p>
-                  <p className="mt-1 font-display text-[12pt] font-semibold">{brlExato(c.total)}</p>
-                  {c.tributos.length > 0 ? (
-                    <ul className="mt-2 space-y-1 text-[8.5pt]">
-                      {c.tributos.map((t) => (
-                        <li key={t.nome} className="flex items-baseline justify-between gap-2 text-left">
-                          <span className="text-ink/70">{t.nome}</span>
-                          <span className="font-medium tabular-nums">{brlExato(t.valor)}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="mt-2 text-[8.5pt] text-ink/55">Detalhamento por tributo não disponível.</p>
-                  )}
-                </div>
-              ))}
-            </div>
+            <table className="mt-3 w-full border-collapse text-[8pt]">
+              <thead>
+                <tr className="bg-frost text-center">
+                  <th className="border border-line px-2 py-1.5 font-display font-semibold">Tributo</th>
+                  {cenarios.map((c) => (
+                    <th key={c.key} className="border border-line px-2 py-1.5 font-display font-semibold">
+                      {c.label}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="text-center">
+                {Array.from(new Set(cenarios.flatMap((c) => c.tributos.map((t) => t.nome)))).map((nome) => (
+                  <tr key={nome}>
+                    <td className="border border-line px-2 py-1.5 font-medium">{nome}</td>
+                    {cenarios.map((c) => {
+                      const valor = c.tributos.find((t) => t.nome === nome)?.valor ?? 0;
+                      return (
+                        <td key={c.key} className="border border-line px-2 py-1.5 tabular-nums">
+                          {valor !== 0 ? brlExato(valor) : "—"}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+                {cenarios.some((c) => c.tributos.length === 0) && (
+                  <tr>
+                    <td colSpan={cenarios.length + 1} className="border border-line px-2 py-1.5 text-ink/55">
+                      Detalhamento por tributo não disponível para cenários sem composição importada.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </>
         ) : (
           <p className="mt-4 text-justify text-[10pt] text-ink/70">Simulações ainda não importadas.</p>
