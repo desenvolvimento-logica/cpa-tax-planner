@@ -16,7 +16,9 @@ import {
   brl,
   CORES_REGIME,
   pct,
+  REGIMES_COM_CREDITO,
   type Parceiro,
+
 } from "@/lib/estudo";
 import { BotaoLinha, CampoTexto, CampoValor, Painel, SeletorRegime } from "./campos";
 
