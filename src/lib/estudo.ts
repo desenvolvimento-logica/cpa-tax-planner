@@ -233,9 +233,11 @@ export function agruparPorRegime(itens: Parceiro[]): {
 }
 
 export const CORES_REGIME: Record<Regime, string> = {
+  Normal: "var(--color-ink)",
   "Lucro Real": "var(--color-ink)",
   "Lucro Presumido": "var(--color-brand)",
   "Simples Nacional": "var(--color-accent)",
   MEI: "var(--color-line)",
   "Outros (Pessoa Física)": "var(--color-mist)",
 };
+
