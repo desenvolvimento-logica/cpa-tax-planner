@@ -96,14 +96,7 @@ function Index() {
 
         <header className="relative mx-auto max-w-7xl px-6 pb-8 pt-10">
           <div className="flex items-center justify-between text-xs font-medium uppercase tracking-[0.2em] text-brand">
-            <span className="flex items-center gap-2">
-              <span className="inline-block size-2 bg-accent-warm" />
-              <CampoTexto
-                valor={estudo.escritorio}
-                onChange={(v) => atualizar({ escritorio: v })}
-                className="w-64 uppercase tracking-[0.2em]"
-              />
-            </span>
+            <span />
             <span className="hidden sm:inline">Confidencial — Estudo para o cliente</span>
           </div>
 
@@ -112,7 +105,7 @@ function Index() {
               <img
                 src={logoLogica.url}
                 alt="Lógica na Reforma — da contabilidade à estratégia"
-                className="mb-5 h-20 w-auto mix-blend-multiply lg:h-24"
+                className="mb-5 h-28 w-auto mix-blend-multiply lg:h-40"
               />
               <h1 className="text-balance font-display text-4xl font-semibold leading-none tracking-tighter lg:text-5xl">
                 Estudo do <span className="text-brand">Simples Nacional Híbrido</span>
