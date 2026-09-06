@@ -19,7 +19,7 @@ function Paragrafos({ texto, className }: { texto: string; className?: string })
         .map((l) => l.trim())
         .filter(Boolean)
         .map((linha, i) => (
-          <p key={i} className={className ?? "mt-3 w-full text-center text-[10.5pt] leading-relaxed text-ink/85"}>
+          <p key={i} className={className ?? "mt-3 w-full text-justify text-[10.5pt] leading-relaxed text-ink/85"}>
             {linha}
           </p>
         ))}
@@ -35,7 +35,7 @@ function Lista({ texto }: { texto: string }) {
   return (
     <ul className="mt-3 w-full space-y-2">
       {itens.map((item, i) => (
-        <li key={i} className="text-center text-[10.5pt] leading-relaxed text-ink/85">
+        <li key={i} className="text-justify text-[10.5pt] leading-relaxed text-ink/85">
           <span className="mx-auto mb-1 block h-[2px] w-6 bg-accent-warm" />
           {item}
         </li>
