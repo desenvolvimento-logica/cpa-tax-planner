@@ -5,7 +5,9 @@ import { SecaoFaturamento } from "@/components/estudo/SecaoFaturamento";
 import { SecaoParceiros } from "@/components/estudo/SecaoParceiros";
 import { SecaoSimulacoes } from "@/components/estudo/SecaoSimulacoes";
 import { CampoTexto } from "@/components/estudo/campos";
+import logoLogica from "@/assets/logica-na-reforma.jpg.asset.json";
 import { estudoVazio } from "@/lib/estudo";
+
 import { useEstudo } from "@/lib/useEstudo";
 
 export const Route = createFileRoute("/")({
