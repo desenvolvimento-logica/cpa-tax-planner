@@ -181,6 +181,55 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
         <Paragrafos texto={d.introducao} />
         <h3 className="mt-8 font-display text-[12pt] font-semibold text-brand">O que muda com a Reforma Tributária</h3>
         <Paragrafos texto={d.oQueMuda} />
+
+        <h3 className="mt-8 font-display text-[12pt] font-semibold text-brand">
+          Simples tradicional e Simples Híbrido lado a lado
+        </h3>
+        <table className="mt-3 w-full border-collapse text-[9pt]">
+          <thead>
+            <tr className="bg-frost text-left">
+              <th className="border border-line px-2 py-1.5 font-display font-semibold">Como fica</th>
+              <th className="border border-line px-2 py-1.5 font-display font-semibold">Simples tradicional</th>
+              <th className="border border-line px-2 py-1.5 font-display font-semibold">Simples Híbrido</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              [
+                "CBS e IBS",
+                "Dentro da guia única do Simples, sem apuração separada",
+                "Apurados e recolhidos à parte, pelo regime regular",
+              ],
+              [
+                "Crédito repassado ao cliente",
+                "Limitado ao valor contido na guia do Simples",
+                "Crédito integral de CBS e IBS na nota",
+              ],
+              [
+                "Crédito sobre as compras",
+                "Não aproveita crédito das compras",
+                "Aproveita o crédito de fornecedores do regime regular",
+              ],
+              [
+                "Demais tributos (IRPJ, CSLL, CPP)",
+                "Permanecem no Simples",
+                "Permanecem no Simples",
+              ],
+              [
+                "Obrigações e controles",
+                "Mais simples, guia única",
+                "Exige controle de créditos e documentação fiscal das compras",
+              ],
+            ].map(([a, b, c]) => (
+              <tr key={a}>
+                <td className="border border-line px-2 py-1.5 font-medium">{a}</td>
+                <td className="border border-line px-2 py-1.5 text-ink/75">{b}</td>
+                <td className="border border-line px-2 py-1.5 text-ink/75">{c}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
         <div className="mt-8 border-l-4 border-accent-warm bg-frost px-4 py-3">
           <p className="font-display text-[10.5pt] font-semibold">Ponto de atenção: abrangência da análise</p>
           <p className="mt-2 text-[9.5pt] leading-relaxed text-ink/75">
