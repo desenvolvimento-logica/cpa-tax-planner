@@ -259,7 +259,7 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
         <Pagina rodape={rodape} numero={++n} total={total}>
           <Cabecalho />
           <h2 className="text-center font-display text-[14pt] font-semibold">Análise das atividades (CNAE)</h2>
-          <p className="mt-3 w-full text-center text-[10pt] leading-relaxed text-ink/80">
+          <p className="mt-3 w-full text-justify text-[10pt] leading-relaxed text-ink/80">
             Estas são as atividades registradas para a sua empresa, o que cada uma abrange e o anexo do Simples
             Nacional correspondente. O enquadramento define a alíquota do Simples e influencia diretamente o resultado
             das simulações apresentadas adiante.
