@@ -306,7 +306,7 @@ export const estudoExemplo: Estudo = {
   },
   observacoes:
     "Dados cadastrais conforme Comprovante de Inscrição CNPJ emitido em 06/09/2026. Faturamento e perfil tributário de clientes e fornecedores referentes ao período de 01/01/2026 a 31/07/2026. Alíquotas de referência para 2027: IBS 18,70% e CBS 9,21%. Simples Nacional atual e modelo híbrido extraídos do Detalhamento Simulação de Cálculo da Reforma Tributária (1ª Fase 2027); Lucro Presumido e Lucro Real extraídos da Consulta Planejamento Tributário (ano 2027). Meses sem movimento permanecem zerados por ausência de dados no período.",
-
+  diagnostico: { ...diagnosticoPadrao, emitidoEm: "06 de setembro de 2026" },
 };
 
 
