@@ -260,9 +260,13 @@ export function parseRegimes(texto: string): { clientes: Parceiro[]; fornecedore
 }
 
 /** Simulação da Reforma Tributária: 1ª FASE 2027, mês a mês. */
-export function parseSimulacaoReforma(texto: string): Pick<Simulacoes, "simplesAtual" | "simplesHibrido"> {
+export function parseSimulacaoReforma(texto: string): Pick<Simulacoes, "simplesAtual" | "simplesHibrido" | "tributos"> {
   const simplesAtual = zeros();
   const simplesHibrido = zeros();
+  const NOMES_ATUAIS = ["IRPJ", "CSLL", "INSS/CPP", "IPI", "ICMS", "ISS", "PIS/Pasep", "COFINS"];
+  const NOMES_HIBRIDO = ["Simples Nacional", "CBS", "IBS"];
+  const somaAtuais = NOMES_ATUAIS.map(() => 0);
+  const somaHibrido = NOMES_HIBRIDO.map(() => 0);
   const linhas = texto.split("\n");
   let mes = -1;
   let esperando = false;
@@ -287,13 +291,26 @@ export function parseSimulacaoReforma(texto: string): Pick<Simulacoes, "simplesA
     // colunas: 8 tributos atuais + Total(8) ... Simples(9) CBS(10) IBS(11) Total(12)
     simplesAtual[mes] = num(valores[8] ?? "");
     simplesHibrido[mes] = num(valores[12] ?? "");
+    NOMES_ATUAIS.forEach((_, i) => {
+      somaAtuais[i] = (somaAtuais[i] ?? 0) + num(valores[i] ?? "");
+    });
+    NOMES_HIBRIDO.forEach((_, i) => {
+      somaHibrido[i] = (somaHibrido[i] ?? 0) + num(valores[9 + i] ?? "");
+    });
     esperando = false;
   }
-  return { simplesAtual, simplesHibrido };
+  return {
+    simplesAtual,
+    simplesHibrido,
+    tributos: {
+      simplesAtual: NOMES_ATUAIS.map((nome, i) => ({ nome, valor: somaAtuais[i] ?? 0 })).filter((t) => t.valor !== 0),
+      simplesHibrido: NOMES_HIBRIDO.map((nome, i) => ({ nome, valor: somaHibrido[i] ?? 0 })).filter((t) => t.valor !== 0),
+    },
+  };
 }
 
 /** Planejamento Tributário: linhas de Lucro Presumido e Lucro Real do ano de 2027. */
-export function parsePlanejamento(texto: string): Pick<Simulacoes, "lucroPresumido" | "lucroReal"> {
+export function parsePlanejamento(texto: string): Pick<Simulacoes, "lucroPresumido" | "lucroReal" | "tributos"> {
   const pegar = (rotulo: RegExp) => {
     for (const linha of texto.split("\n")) {
       if (!rotulo.test(linha.trim())) continue;
@@ -303,9 +320,31 @@ export function parsePlanejamento(texto: string): Pick<Simulacoes, "lucroPresumi
     }
     return zeros();
   };
+  const tributosDe = (rotulo: RegExp) => {
+    const linhas = texto.split("\n");
+    const inicio = linhas.findIndex((l) => rotulo.test(l));
+    if (inicio < 0) return [];
+    const itens: { nome: string; valor: number }[] = [];
+    for (const linha of linhas.slice(inicio + 1)) {
+      const cru = linha.trim();
+      if (/^DETALHAMENTO/i.test(cru)) break;
+      if (/^total\b/i.test(cru)) break;
+      const valores = cru.match(RX_VALOR);
+      if (!valores || valores.length < 13) continue;
+      const nome = cru.slice(0, cru.indexOf(valores[0] ?? "")).trim();
+      if (!nome || /^tributos/i.test(nome)) continue;
+      itens.push({ nome, valor: num(valores[valores.length - 1] ?? "") });
+    }
+    return itens;
+  };
+
   return {
     lucroPresumido: pegar(/^Lucro Presumido\b/i),
     lucroReal: pegar(/^Lucro Real\b/i),
+    tributos: {
+      lucroPresumido: tributosDe(/DETALHAMENTO LUCRO PRESUMIDO/i),
+      lucroReal: tributosDe(/DETALHAMENTO LUCRO REAL/i),
+    },
   };
 }
 
@@ -434,12 +473,26 @@ export async function importarArquivos(
         });
       } else if (tipo === "simulacao-reforma") {
         const parcial = parseSimulacaoReforma(texto);
-        estudo = { ...estudo, simulacoes: { ...estudo.simulacoes, ...parcial } };
+        estudo = {
+          ...estudo,
+          simulacoes: {
+            ...estudo.simulacoes,
+            ...parcial,
+            tributos: { ...estudo.simulacoes.tributos, ...parcial.tributos },
+          },
+        };
         const meses = parcial.simplesAtual.filter((v) => v > 0).length;
         resultados.push({ nome: arquivo.name, tipo, resumo: `${meses} mês(es) de 2027 preenchidos`, ok: meses > 0 });
       } else if (tipo === "planejamento") {
         const parcial = parsePlanejamento(texto);
-        estudo = { ...estudo, simulacoes: { ...estudo.simulacoes, ...parcial } };
+        estudo = {
+          ...estudo,
+          simulacoes: {
+            ...estudo.simulacoes,
+            ...parcial,
+            tributos: { ...estudo.simulacoes.tributos, ...parcial.tributos },
+          },
+        };
         const meses = parcial.lucroPresumido.filter((v) => v > 0).length;
         resultados.push({ nome: arquivo.name, tipo, resumo: `${meses} mês(es) de 2027 preenchidos`, ok: meses > 0 });
       } else if (tipo === "cnae") {

@@ -1,5 +1,4 @@
-import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { brl, CENARIOS, MESES, soma, type Simulacoes } from "@/lib/estudo";
+import { brl, CENARIOS, MESES, soma, type CenarioKey, type Simulacoes } from "@/lib/estudo";
 import { CampoValor, Painel } from "./campos";
 
 const CORES: Record<string, string> = {
@@ -23,16 +22,10 @@ export function SecaoSimulacoes({
   const atual = totais.find((t) => t.key === "simplesAtual")!;
   const receita = soma(faturamento);
 
-  const dadosGrafico = MESES.map((mes, i) => ({
-    mes,
-    "Simples atual": simulacoes.simplesAtual[i] ?? 0,
-    "Simples híbrido": simulacoes.simplesHibrido[i] ?? 0,
-    "Lucro Presumido": simulacoes.lucroPresumido[i] ?? 0,
-    "Lucro Real": simulacoes.lucroReal[i] ?? 0,
-  }));
-
-  const editar = (key: keyof Simulacoes, mes: number, valor: number) =>
+  const editar = (key: CenarioKey, mes: number, valor: number) =>
     onChange({ ...simulacoes, [key]: simulacoes[key].map((v, i) => (i === mes ? valor : v)) });
+
+  const tributosDe = (key: CenarioKey) => (simulacoes.tributos?.[key] ?? []).filter((t) => t.valor !== 0);
 
   return (
     <Painel
@@ -87,29 +80,18 @@ export function SecaoSimulacoes({
         </table>
       </div>
 
-      <div className="mt-6 h-64">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={dadosGrafico} margin={{ left: -12, right: 8 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-line)" vertical={false} />
-            <XAxis dataKey="mes" tick={{ fontSize: 11 }} />
-            <YAxis tick={{ fontSize: 10 }} tickFormatter={(v: number) => `${Math.round(v / 1000)}k`} />
-            <Tooltip formatter={(v: number) => brl(v)} />
-            <Legend wrapperStyle={{ fontSize: 11 }} />
-            <Bar dataKey="Simples atual" fill={CORES["simplesAtual"]} />
-            <Bar dataKey="Simples híbrido" fill={CORES["simplesHibrido"]} />
-            <Bar dataKey="Lucro Presumido" fill={CORES["lucroPresumido"]} />
-            <Bar dataKey="Lucro Real" fill={CORES["lucroReal"]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+      <h3 className="mt-8 font-display text-xs font-semibold uppercase tracking-widest text-ink/60">
+        Comparativo dos regimes · total do ano e composição por tributo
+      </h3>
 
-      <div className="mt-6 grid gap-4 md:grid-cols-4">
+      <div className="mt-3 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {totais.map((t) => {
           const diferenca = atual.total - t.total;
+          const tributos = tributosDe(t.key);
           return (
             <div
               key={t.key}
-              className={`clip-tilt p-5 ring-1 ${
+              className={`rounded-xl p-5 ring-1 ${
                 t.key === melhor.key ? "bg-accent-warm/10 ring-accent-warm/40" : "bg-frost ring-line"
               }`}
             >
@@ -123,6 +105,26 @@ export function SecaoSimulacoes({
                   {diferenca >= 0 ? "Economia" : "Custo adicional"} de {brl(Math.abs(diferenca))} vs. Simples atual
                 </p>
               )}
+
+              <div className="mt-4 border-t border-line pt-3">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                  Por tributo (ano)
+                </p>
+                {tributos.length > 0 ? (
+                  <ul className="mt-2 space-y-1 text-xs">
+                    {tributos.map((trib) => (
+                      <li key={trib.nome} className="flex items-baseline justify-between gap-2">
+                        <span className="text-ink/70">{trib.nome}</span>
+                        <span className="tabular-nums font-medium">{brl(trib.valor)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Detalhamento por tributo não disponível neste relatório.
+                  </p>
+                )}
+              </div>
             </div>
           );
         })}
