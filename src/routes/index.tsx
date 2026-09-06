@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { SecaoImportacao } from "@/components/estudo/SecaoImportacao";
 import { SecaoCadastro, SecaoCnaes } from "@/components/estudo/SecaoCadastro";
 import { SecaoFaturamento } from "@/components/estudo/SecaoFaturamento";
 import { SecaoParceiros } from "@/components/estudo/SecaoParceiros";
@@ -35,6 +36,7 @@ export const Route = createFileRoute("/")({
 });
 
 const ETAPAS = [
+  { id: "importacao", numero: "00", nome: "Importar" },
   { id: "cadastro", numero: "01", nome: "Cadastral" },
   { id: "cnaes", numero: "02", nome: "CNAEs" },
   { id: "faturamento", numero: "03", nome: "Faturamento" },
@@ -45,12 +47,18 @@ const ETAPAS = [
 
 function Index() {
   const { estudo, setEstudo, atualizar } = useEstudo();
-  const [etapa, setEtapa] = useState("cadastro");
+  const [etapa, setEtapa] = useState("importacao");
   const [documentoAberto, setDocumentoAberto] = useState(false);
 
   const irPara = (id: string) => {
     setEtapa(id);
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (id === "importacao") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    window.requestAnimationFrame(() =>
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }),
+    );
   };
 
   if (documentoAberto) {
@@ -136,7 +144,7 @@ function Index() {
             </div>
           </div>
 
-          <nav className="no-print mt-8 grid grid-cols-2 gap-2 sm:grid-cols-6">
+          <nav className="no-print mt-8 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
             {ETAPAS.map((e) => (
               <button
                 key={e.id}
@@ -158,6 +166,14 @@ function Index() {
         </header>
 
         <main className="relative mx-auto grid max-w-7xl gap-5 px-6 pb-16">
+          {etapa === "importacao" ? (
+            <SecaoImportacao
+              estudo={estudo}
+              onImportado={(novo) => setEstudo(novo)}
+              onAbrirEstudo={() => irPara("cadastro")}
+            />
+          ) : (
+          <>
           <div id="cadastro" className="min-w-0 scroll-mt-6">
             <SecaoCadastro cadastro={estudo.cadastro} onChange={(cadastro) => atualizar({ cadastro })} />
           </div>
@@ -212,6 +228,9 @@ function Index() {
               className="mt-3 min-h-24 text-sm"
             />
           </section>
+          </>
+          )}
+
         </main>
       </div>
     </div>
