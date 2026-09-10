@@ -59,9 +59,9 @@ export type Parceiro = {
   regime: Regime;
   valor: number;
   /** IBS informado na planilha (débito/crédito). Sem valor, calcula-se pela alíquota. */
-  ibs?: number;
+  ibs?: number | undefined;
   /** CBS informado na planilha (débito/crédito). Sem valor, calcula-se pela alíquota. */
-  cbs?: number;
+  cbs?: number | undefined;
 };
 
 export const ibsDe = (p: Parceiro) => p.ibs ?? p.valor * ALIQUOTA_IBS;
