@@ -53,6 +53,8 @@ function extrairParceiros(linhas: Linha[]): Parceiro[] {
   const iDoc = idx((c) => c.includes("cnpj") || c.includes("cpf"));
   const iValor = idx((c) => c.includes("valor"));
   const iRegime = idx((c) => c.includes("regime"));
+  const iIbs = idx((c) => c.includes("ibs"));
+  const iCbs = idx((c) => c.includes("cbs") && !c.includes("aliq"));
   if (iNome < 0 || iValor < 0) return [];
 
   const mapa = new Map<string, Parceiro>();
@@ -62,13 +64,19 @@ function extrairParceiros(linhas: Linha[]): Parceiro[] {
     const valor = paraNumero(linha[iValor]);
     const doc = iDoc >= 0 ? String(linha[iDoc] ?? "").trim() : "";
     const regime = normalizarRegime(iRegime >= 0 ? String(linha[iRegime] ?? "") : "");
+    const ibs = iIbs >= 0 ? paraNumero(linha[iIbs]) : undefined;
+    const cbs = iCbs >= 0 ? paraNumero(linha[iCbs]) : undefined;
     const chave = `${doc || nome}|${regime}`;
     const atual = mapa.get(chave);
-    if (atual) atual.valor += valor;
-    else mapa.set(chave, { id: novoId(), nome, cnpj: doc, regime, valor });
+    if (atual) {
+      atual.valor += valor;
+      if (ibs !== undefined) atual.ibs = (atual.ibs ?? 0) + ibs;
+      if (cbs !== undefined) atual.cbs = (atual.cbs ?? 0) + cbs;
+    } else mapa.set(chave, { id: novoId(), nome, cnpj: doc, regime, valor, ibs, cbs });
   }
+  const arred = (n?: number) => (n === undefined ? undefined : Math.round(n * 100) / 100);
   return [...mapa.values()]
-    .map((p) => ({ ...p, valor: Math.round(p.valor * 100) / 100 }))
+    .map((p) => ({ ...p, valor: Math.round(p.valor * 100) / 100, ibs: arred(p.ibs), cbs: arred(p.cbs) }))
     .filter((p) => p.valor > 0)
     .sort((a, b) => b.valor - a.valor);
 }
