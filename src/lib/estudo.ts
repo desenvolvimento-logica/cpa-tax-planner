@@ -58,7 +58,14 @@ export type Parceiro = {
   cnpj: string;
   regime: Regime;
   valor: number;
+  /** IBS informado na planilha (débito/crédito). Sem valor, calcula-se pela alíquota. */
+  ibs?: number;
+  /** CBS informado na planilha (débito/crédito). Sem valor, calcula-se pela alíquota. */
+  cbs?: number;
 };
+
+export const ibsDe = (p: Parceiro) => p.ibs ?? p.valor * ALIQUOTA_IBS;
+export const cbsDe = (p: Parceiro) => p.cbs ?? p.valor * ALIQUOTA_CBS;
 
 export type CenarioKey = "simplesAtual" | "simplesHibrido" | "lucroPresumido" | "lucroReal";
 
