@@ -73,23 +73,47 @@ function extrairParceiros(linhas: Linha[]): Parceiro[] {
     .sort((a, b) => b.valor - a.valor);
 }
 
+function extrairFaturamento(linhas: Linha[]): number[] | null {
+  for (let i = 0; i < Math.min(linhas.length, 20); i++) {
+    const cols = (linhas[i] ?? []).map((c) => semAcento(String(c ?? "")));
+    const iMes = cols.findIndex((c) => c === "mes" || c.startsWith("mes"));
+    const iFat = cols.findIndex((c) => c.includes("faturamento") || c.includes("receita"));
+    if (iMes < 0 || iFat < 0) continue;
+    const meses = Array.from({ length: 12 }, () => 0);
+    let algum = false;
+    for (const linha of linhas.slice(i + 1)) {
+      const m = Math.round(paraNumero(linha[iMes]));
+      if (m < 1 || m > 12) continue;
+      const v = paraNumero(linha[iFat]);
+      meses[m - 1] = (meses[m - 1] ?? 0) + v;
+      if (v > 0) algum = true;
+    }
+    if (algum) return meses;
+  }
+  return null;
+}
+
 /** Lê a planilha de regimes (abas de entradas/compras e vendas). */
 export async function parsePlanilhaRegimes(
   file: File,
-): Promise<{ clientes: Parceiro[]; fornecedores: Parceiro[] }> {
+): Promise<{ clientes: Parceiro[]; fornecedores: Parceiro[]; faturamento: number[] | null }> {
   const XLSX = await import("xlsx");
   const buffer = await file.arrayBuffer();
   const wb = XLSX.read(buffer, { type: "array" });
 
   let clientes: Parceiro[] = [];
   let fornecedores: Parceiro[] = [];
+  let faturamento: number[] | null = null;
 
   for (const nomeAba of wb.SheetNames) {
     const aba = wb.Sheets[nomeAba];
     if (!aba) continue;
     const linhas = XLSX.utils.sheet_to_json<Linha>(aba, { header: 1, raw: true, defval: "" });
     const itens = extrairParceiros(linhas);
-    if (!itens.length) continue;
+    if (!itens.length) {
+      faturamento = faturamento ?? extrairFaturamento(linhas);
+      continue;
+    }
     const n = semAcento(nomeAba);
     const cabecalho = acharCabecalho(linhas)?.cols.join(" ") ?? "";
     const ehCliente = n.includes("venda") || n.includes("cliente") || n.includes("saida") || cabecalho.includes("cliente");
@@ -97,5 +121,5 @@ export async function parsePlanilhaRegimes(
     else fornecedores = fornecedores.concat(itens);
   }
 
-  return { clientes, fornecedores };
+  return { clientes, fornecedores, faturamento };
 }
