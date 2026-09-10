@@ -56,8 +56,8 @@ export function SecaoParceiros({ numero, tipo, itens, onChange }: Props) {
           <tbody>
             {itens.map((item) => {
               const gera = REGIMES_COM_CREDITO.includes(item.regime);
-              const ibs = item.valor * ALIQUOTA_IBS;
-              const cbs = item.valor * ALIQUOTA_CBS;
+              const ibs = ibsDe(item);
+              const cbs = cbsDe(item);
               // Fornecedores fora do regime normal: valor apenas indicativo (não entra no total).
               const informativo = fornecedor && !gera;
               return (
