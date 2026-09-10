@@ -11,7 +11,7 @@ type Props = {
 const ESPERADOS = [
   "Consulta CNPJ (dados cadastrais e CNAEs)",
   "Declaração de faturamento",
-  "Perfil tributário de clientes e fornecedores",
+  "Perfil tributário de clientes e fornecedores (PDF ou planilha Excel)",
   "Detalhamento da Simulação da Reforma Tributária (2027)",
   "Consulta Planejamento Tributário (2027)",
   "Consultas de CNAE (o que compreende e não compreende)",
@@ -26,7 +26,7 @@ export function SecaoImportacao({ estudo, onImportado, onAbrirEstudo }: Props) {
 
   const processar = async (lista: FileList | null) => {
     if (!lista?.length) return;
-    const arquivos = Array.from(lista).filter((f) => f.name.toLowerCase().endsWith(".pdf"));
+    const arquivos = Array.from(lista).filter((f) => /\.(pdf|xlsx|xlsm|xls|csv)$/i.test(f.name));
     if (!arquivos.length) return;
     setProcessando(true);
     try {
@@ -69,12 +69,12 @@ export function SecaoImportacao({ estudo, onImportado, onAbrirEstudo }: Props) {
           arrastando ? "border-brand bg-brand/5" : "border-line bg-white/60"
         }`}
       >
-        <p className="font-display text-lg font-semibold">Arraste os PDFs aqui</p>
+        <p className="font-display text-lg font-semibold">Arraste os PDFs e planilhas aqui</p>
         <p className="mt-1 text-sm text-ink/60">ou selecione os arquivos no seu computador</p>
         <input
           ref={inputRef}
           type="file"
-          accept="application/pdf"
+          accept=".pdf,.xlsx,.xlsm,.xls,.csv,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
           multiple
           className="hidden"
           onChange={(e) => void processar(e.target.files)}

@@ -427,6 +427,28 @@ export async function importarArquivos(
   const resultados: ResultadoArquivo[] = [];
 
   for (const arquivo of arquivos) {
+    if (/\.(xlsx|xlsm|xls|csv)$/i.test(arquivo.name)) {
+      try {
+        const { parsePlanilhaRegimes } = await import("./importarExcel");
+        const { clientes, fornecedores, faturamento } = await parsePlanilhaRegimes(arquivo);
+        estudo = {
+          ...estudo,
+          clientes: clientes.length ? clientes : estudo.clientes,
+          fornecedores: fornecedores.length ? fornecedores : estudo.fornecedores,
+          faturamento: faturamento ?? estudo.faturamento,
+        };
+        resultados.push({
+          nome: arquivo.name,
+          tipo: "regimes",
+          resumo: `${clientes.length} cliente(s) · ${fornecedores.length} fornecedor(es)${faturamento ? " · faturamento" : ""}`,
+          ok: clientes.length + fornecedores.length > 0,
+        });
+      } catch {
+        resultados.push({ nome: arquivo.name, tipo: "regimes", resumo: "Não foi possível ler a planilha.", ok: false });
+      }
+      continue;
+    }
+
     let texto = "";
     try {
       texto = await extrairTexto(arquivo);

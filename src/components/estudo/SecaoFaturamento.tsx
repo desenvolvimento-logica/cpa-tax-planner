@@ -13,16 +13,7 @@ export function SecaoFaturamento({
   const media = meses ? total / meses : 0;
 
   return (
-    <Painel
-      numero="03"
-      titulo="Faturamento mensal"
-      acessorio={
-        <div className="text-right">
-          <p className="text-[11px] uppercase tracking-widest text-muted-foreground">Total no período</p>
-          <p className="font-display text-2xl font-semibold leading-none">{brl(total)}</p>
-        </div>
-      }
-    >
+    <Painel numero="03" titulo="Faturamento mensal">
       <div className="grid gap-x-8 gap-y-1 sm:grid-cols-2 lg:grid-cols-3">
         {MESES.map((mes, i) => (
           <div key={mes} className="flex items-center gap-2 border-b border-line/70 py-1">
