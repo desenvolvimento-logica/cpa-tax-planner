@@ -388,16 +388,18 @@ export function agruparPorRegime(itens: Parceiro[]): {
     const grupo = itens.filter((i) => i.regime === regime);
     const valor = grupo.reduce((a, b) => a + b.valor, 0);
     const geraCredito = REGIMES_COM_CREDITO.includes(regime);
+    const ibsPotencial = grupo.reduce((a, b) => a + ibsDe(b), 0);
+    const cbsPotencial = grupo.reduce((a, b) => a + cbsDe(b), 0);
     return {
       regime,
       valor,
       quantidade: grupo.length,
       participacao: total > 0 ? valor / total : 0,
       geraCredito,
-      ibs: geraCredito ? valor * ALIQUOTA_IBS : 0,
-      cbs: geraCredito ? valor * ALIQUOTA_CBS : 0,
-      ibsPotencial: valor * ALIQUOTA_IBS,
-      cbsPotencial: valor * ALIQUOTA_CBS,
+      ibs: geraCredito ? ibsPotencial : 0,
+      cbs: geraCredito ? cbsPotencial : 0,
+      ibsPotencial,
+      cbsPotencial,
     };
   }).filter((l) => l.quantidade > 0);
 
@@ -406,8 +408,8 @@ export function agruparPorRegime(itens: Parceiro[]): {
     total,
     totalIbs: linhas.reduce((a, b) => a + b.ibs, 0),
     totalCbs: linhas.reduce((a, b) => a + b.cbs, 0),
-    totalIbsPotencial: total * ALIQUOTA_IBS,
-    totalCbsPotencial: total * ALIQUOTA_CBS,
+    totalIbsPotencial: linhas.reduce((a, b) => a + b.ibsPotencial, 0),
+    totalCbsPotencial: linhas.reduce((a, b) => a + b.cbsPotencial, 0),
     totalSemCredito: linhas.filter((l) => !l.geraCredito).reduce((a, b) => a + b.valor, 0),
   };
 }
