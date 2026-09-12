@@ -2,7 +2,6 @@ import capa from "@/assets/capa-diagnostico.jpg";
 import logoLogica from "@/assets/logica-na-reforma.jpg.asset.json";
 import {
   ALIQUOTA_CBS,
-  ALIQUOTA_IBS,
   CENARIOS,
   agruparPorRegime,
   brlExato,
@@ -98,10 +97,9 @@ function TabelaPerfil({
   titulo: string;
   colunaValor: string;
   colunaCredito: string;
-  linhas: { perfil: string; participacao: number; valor: number; ibs: number; cbs: number; efeito: string }[];
+  linhas: { perfil: string; participacao: number; valor: number; cbs: number; efeito: string }[];
 }) {
   const totalValor = linhas.reduce((a, b) => a + b.valor, 0);
-  const totalIbs = linhas.reduce((a, b) => a + b.ibs, 0);
   const totalCbs = linhas.reduce((a, b) => a + b.cbs, 0);
   return (
     <table className="mt-4 w-full border-collapse text-[9pt]">
@@ -110,9 +108,6 @@ function TabelaPerfil({
           <th className="border border-line px-2 py-1.5 font-display font-semibold">{titulo}</th>
           <th className="border border-line px-2 py-1.5 font-display font-semibold">%</th>
           <th className="border border-line px-2 py-1.5 font-display font-semibold">{colunaValor}</th>
-          <th className="border border-line px-2 py-1.5 font-display font-semibold">
-            IBS {pct(ALIQUOTA_IBS)}
-          </th>
           <th className="border border-line px-2 py-1.5 font-display font-semibold">
             CBS {pct(ALIQUOTA_CBS)}
           </th>
@@ -125,7 +120,6 @@ function TabelaPerfil({
             <td className="border border-line px-2 py-1.5">{l.perfil}</td>
             <td className="border border-line px-2 py-1.5">{pct(l.participacao)}</td>
             <td className="border border-line px-2 py-1.5">{brlExato(l.valor)}</td>
-            <td className="border border-line px-2 py-1.5">{brlExato(l.ibs)}</td>
             <td className="border border-line px-2 py-1.5">{brlExato(l.cbs)}</td>
             <td className="border border-line px-2 py-1.5 text-ink/75">{l.efeito}</td>
           </tr>
@@ -134,7 +128,6 @@ function TabelaPerfil({
           <td className="border border-line px-2 py-1.5">Total</td>
           <td className="border border-line px-2 py-1.5">100,00%</td>
           <td className="border border-line px-2 py-1.5">{brlExato(totalValor)}</td>
-          <td className="border border-line px-2 py-1.5">{brlExato(totalIbs)}</td>
           <td className="border border-line px-2 py-1.5">{brlExato(totalCbs)}</td>
           <td className="border border-line px-2 py-1.5" />
         </tr>
@@ -298,7 +291,7 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
         <Titulo>A análise que fizemos para você</Titulo>
         <p className="mt-3 w-full text-justify text-[10.5pt] leading-relaxed text-ink/85">
           Analisamos as vendas da sua empresa no ano-base de {d.anoBase}, somando {brlExato(faturamento)}. Veja como o
-          seu faturamento se distribui entre os perfis de cliente e quanto de débito de CBS e IBS cada perfil
+           seu faturamento se distribui entre os perfis de cliente e quanto de débito de CBS cada perfil
           representa:
         </p>
         <TabelaPerfil
@@ -309,7 +302,6 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
             perfil: l.regime,
             participacao: l.participacao,
             valor: l.valor,
-            ibs: l.ibsPotencial,
             cbs: l.cbsPotencial,
             efeito: l.geraCredito ? "Passará a exigir crédito integral" : "Não aproveita crédito",
           }))}
@@ -327,15 +319,13 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
             perfil: l.regime,
             participacao: l.participacao,
             valor: l.valor,
-            ibs: l.ibsPotencial,
             cbs: l.cbsPotencial,
-            efeito: l.geraCredito ? "Gera crédito de CBS/IBS" : "Sem direito a crédito",
+            efeito: l.geraCredito ? "Gera crédito de CBS" : "Sem direito a crédito",
           }))}
         />
 
-        <div className="mt-6 grid grid-cols-3 gap-3 text-center">
+        <div className="mt-6 grid grid-cols-2 gap-3 text-center">
           {[
-            { r: "Crédito efetivo de IBS", v: brlExato(fornecedores.totalIbs) },
             { r: "Crédito efetivo de CBS", v: brlExato(fornecedores.totalCbs) },
             { r: "Compras sem direito a crédito", v: brlExato(fornecedores.totalSemCredito) },
           ].map((c) => (
@@ -346,10 +336,10 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
           ))}
         </div>
         <p className="mt-4 text-justify text-[8pt] italic leading-snug text-ink/55">
-          * Valores calculados com as alíquotas de referência de {pct(ALIQUOTA_IBS)} (IBS) e {pct(ALIQUOTA_CBS)} (CBS).
+          * Valores calculados com a alíquota de referência de {pct(ALIQUOTA_CBS)} para a CBS em 2027.
           Nas linhas de fornecedores do Simples Nacional, MEI e pessoa física os valores indicam o crédito que se
           perderia, e não integram o crédito efetivo. Hoje, {pct(participacaoNormal)} do seu faturamento vem de
-          clientes que passarão a exigir crédito integral de CBS e IBS.
+           clientes que passarão a exigir crédito integral de CBS.
         </p>
       </Pagina>
 

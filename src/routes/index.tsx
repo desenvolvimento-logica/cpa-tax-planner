@@ -20,7 +20,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Sistema de apresentação contábil: dados cadastrais, CNAEs e anexos, faturamento, créditos de IBS e CBS por regime de fornecedores e clientes e simulações tributárias para 2027.",
+          "Sistema de apresentação contábil: consulta cadastral, CNAEs e anexos, faturamento, CBS por regime de fornecedores e clientes e simulações tributárias para 2027.",
       },
       { property: "og:title", content: "Estudo do Simples Nacional Híbrido — Reforma Tributária 2027" },
       {
@@ -111,7 +111,7 @@ function Index() {
                 Estudo do <span className="text-brand">Simples Nacional Híbrido</span>
               </h1>
               <p className="mt-4 text-pretty text-base text-ink/70">
-                Comparativo de regimes sob a Reforma Tributária (IBS 18,70% · CBS 9,21%) — cenário projetado para 2027.
+                 Comparativo de regimes sob a Reforma Tributária, com foco na CBS de 9,21% — cenário projetado para 2027.
               </p>
             </div>
 
