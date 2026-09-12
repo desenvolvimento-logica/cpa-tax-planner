@@ -499,8 +499,7 @@ export async function importarArquivos(
                 : item;
             });
             cadastroConsultado = true;
-          } catch (erro) {
-            console.error("Falha na consulta cadastral automática", erro);
+          } catch {
             cadastro = { ...cadastro, cnpj: cadastro.cnpj || cnpj };
             avisoConsulta = " · cadastro público indisponível";
           }
