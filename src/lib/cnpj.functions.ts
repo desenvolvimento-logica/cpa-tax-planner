@@ -111,7 +111,7 @@ export const consultarCnpjPublico = createServerFn({ method: "POST" })
       headers: { Accept: "application/json" },
       signal: AbortSignal.timeout(12_000),
     });
-    if (!resposta.ok) throw new Error("Não foi possível consultar o cadastro público deste CNPJ.");
+    if (!resposta.ok) throw new Error(`Não foi possível consultar o cadastro público deste CNPJ (${resposta.status}).`);
     const dados = (await resposta.json()) as BrasilApiCnpj;
 
     const atividades = [
