@@ -19,7 +19,7 @@ type BrasilApiCnpj = {
   municipio?: string;
   uf?: string;
   cep?: string;
-  descricao_porte?: string;
+  porte?: string;
   opcao_pelo_simples?: boolean;
   opcao_pelo_mei?: boolean;
   cnae_fiscal?: number;
@@ -149,7 +149,7 @@ export const consultarCnpjPublico = createServerFn({ method: "POST" })
         nomeFantasia: dados.nome_fantasia ?? "",
         abertura: formatarData(dados.data_inicio_atividade),
         endereco,
-        situacao: [dados.descricao_situacao_cadastral, dados.descricao_porte].filter(Boolean).join(" — "),
+        situacao: [dados.descricao_situacao_cadastral, dados.porte].filter(Boolean).join(" — "),
         naturezaJuridica: natureza,
         capitalSocial: (dados.capital_social ?? 0).toLocaleString("pt-BR", {
           style: "currency",

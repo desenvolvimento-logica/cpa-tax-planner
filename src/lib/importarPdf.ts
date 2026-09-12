@@ -1,5 +1,6 @@
 import type { Cadastro, CnaeItem, Estudo, Parceiro, Regime, Simulacoes } from "./estudo";
 import { REGIMES } from "./estudo";
+import { consultarCnpjPublico } from "./cnpj.functions";
 
 export type TipoRelatorio =
   | "cnpj"
@@ -483,7 +484,6 @@ export async function importarArquivos(
         let cnaes = estudo.cnaes;
         if (cnpj) {
           try {
-            const { consultarCnpjPublico } = await import("./cnpj.functions");
             const consulta = await consultarCnpjPublico({ data: { cnpj } });
             cadastro = { ...cadastro, ...consulta.cadastro, regimeAtual: regimeAtual || consulta.cadastro.regimeAtual || cadastro.regimeAtual };
             cnaes = consulta.cnaes.map((item) => {
