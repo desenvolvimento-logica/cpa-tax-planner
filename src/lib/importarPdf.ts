@@ -1,5 +1,6 @@
 import type { Cadastro, CnaeItem, Estudo, Parceiro, Regime, Simulacoes } from "./estudo";
 import { REGIMES } from "./estudo";
+import { consultarCnpjPublico } from "./cnpj.functions";
 
 export type TipoRelatorio =
   | "cnpj"
@@ -197,7 +198,7 @@ export function parseCnpj(texto: string): { cadastro: Partial<Cadastro>; cnaes: 
   };
 }
 
-export function parseFaturamento(texto: string): { faturamento: number[]; regimeAtual: string } {
+export function parseFaturamento(texto: string): { faturamento: number[]; regimeAtual: string; cnpj: string } {
   const faturamento = zeros();
   for (const linha of texto.split("\n")) {
     const semAcento = linha
@@ -213,7 +214,8 @@ export function parseFaturamento(texto: string): { faturamento: number[]; regime
     faturamento[idx] = num(valores[valores.length - 1] ?? "");
   }
   const regimeAtual = texto.match(/REGIME\s*:?\s*([^\n]+)/i)?.[1]?.trim() ?? "";
-  return { faturamento, regimeAtual };
+  const cnpj = texto.match(/\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}/)?.[0] ?? "";
+  return { faturamento, regimeAtual, cnpj };
 }
 
 export function parseRegimes(texto: string): { clientes: Parceiro[]; fornecedores: Parceiro[] } {
@@ -474,17 +476,46 @@ export async function importarArquivos(
           ok: true,
         });
       } else if (tipo === "faturamento") {
-        const { faturamento, regimeAtual } = parseFaturamento(texto);
+        const { faturamento, regimeAtual, cnpj } = parseFaturamento(texto);
         const total = faturamento.reduce((a, b) => a + b, 0);
+        let cadastroConsultado = false;
+        let avisoConsulta = "";
+        let cadastro = { ...estudo.cadastro, regimeAtual: regimeAtual || estudo.cadastro.regimeAtual };
+        let cnaes = estudo.cnaes;
+        if (cnpj) {
+          try {
+            const consulta = await consultarCnpjPublico({ data: { cnpj } });
+            cadastro = { ...cadastro, ...consulta.cadastro, regimeAtual: regimeAtual || consulta.cadastro.regimeAtual || cadastro.regimeAtual };
+            cnaes = consulta.cnaes.map((item) => {
+              const existente = estudo.cnaes.find((c) => c.codigo.replace(/\D/g, "") === item.codigo.replace(/\D/g, ""));
+              return existente
+                ? {
+                    ...item,
+                    id: existente.id,
+                    compreende: item.compreende || existente.compreende,
+                    naoCompreende: item.naoCompreende || existente.naoCompreende,
+                    anexo: item.anexo || existente.anexo,
+                  }
+                : item;
+            });
+            cadastroConsultado = true;
+          } catch {
+            cadastro = { ...cadastro, cnpj: cadastro.cnpj || cnpj };
+            avisoConsulta = " · cadastro público indisponível";
+          }
+        }
         estudo = {
           ...estudo,
           faturamento,
-          cadastro: { ...estudo.cadastro, regimeAtual: regimeAtual || estudo.cadastro.regimeAtual },
+          cadastro,
+          cnaes,
         };
         resultados.push({
           nome: arquivo.name,
           tipo,
-          resumo: `Total ${total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}`,
+          resumo: `Total ${total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}${
+            cadastroConsultado ? ` · cadastro e ${cnaes.length} CNAE(s) consultados` : avisoConsulta
+          }`,
           ok: total > 0,
         });
       } else if (tipo === "regimes") {

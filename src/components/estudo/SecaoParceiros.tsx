@@ -1,11 +1,8 @@
 import {
   ALIQUOTA_CBS,
-  ALIQUOTA_IBS,
   agruparPorRegime,
   brl,
   cbsDe,
-  CORES_REGIME,
-  ibsDe,
   pct,
   REGIMES_COM_CREDITO,
   type Parceiro,
@@ -48,7 +45,6 @@ export function SecaoParceiros({ numero, tipo, itens, onChange }: Props) {
               <th className="py-2 text-left font-medium">CNPJ / CPF</th>
               <th className="py-2 text-left font-medium">Regime</th>
               <th className="py-2 text-right font-medium">{fornecedor ? "Compras" : "Vendas"}</th>
-              <th className="py-2 text-right font-medium">{rotulo} IBS</th>
               <th className="py-2 text-right font-medium">{rotulo} CBS</th>
               <th className="w-8" />
             </tr>
@@ -56,7 +52,6 @@ export function SecaoParceiros({ numero, tipo, itens, onChange }: Props) {
           <tbody>
             {itens.map((item) => {
               const gera = REGIMES_COM_CREDITO.includes(item.regime);
-              const ibs = ibsDe(item);
               const cbs = cbsDe(item);
               // Fornecedores fora do regime normal: valor apenas indicativo (não entra no total).
               const informativo = fornecedor && !gera;
@@ -92,11 +87,6 @@ export function SecaoParceiros({ numero, tipo, itens, onChange }: Props) {
                   <td
                     className={`py-1 pr-2 text-right tabular-nums ${informativo ? "text-accent-warm/80 italic" : ""}`}
                   >
-                    {informativo ? `(${brl(ibs)})` : brl(ibs)}
-                  </td>
-                  <td
-                    className={`py-1 pr-2 text-right tabular-nums ${informativo ? "text-accent-warm/80 italic" : ""}`}
-                  >
                     {informativo ? `(${brl(cbs)})` : brl(cbs)}
                   </td>
                   <td className="py-1 text-right">
@@ -126,102 +116,18 @@ export function SecaoParceiros({ numero, tipo, itens, onChange }: Props) {
       <h3 className="mt-8 font-display text-xs font-semibold uppercase tracking-widest text-ink/60">
         Consolidado por regime
       </h3>
-      <div className="mt-3 overflow-x-auto">
-        <table className="w-full min-w-[520px] text-sm">
-          <thead>
-            <tr className="border-b border-line text-[11px] uppercase tracking-widest text-muted-foreground">
-              <th className="py-2 text-left font-medium">Regime</th>
-              <th className="py-2 text-right font-medium">%</th>
-              <th className="py-2 text-right font-medium">Valor</th>
-              <th className="py-2 text-right font-medium">IBS 18,70%</th>
-              <th className="py-2 text-right font-medium">CBS 9,21%</th>
-              <th className="py-2 text-right font-medium">{rotulo} total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {resumo.linhas.map((l) => {
-              const informativo = fornecedor && !l.geraCredito;
-              const classe = informativo ? "text-accent-warm/80 italic" : "";
-              return (
-                <tr key={l.regime} className="border-b border-line/70">
-                  <td className="py-2">
-                    <span className="flex items-center gap-2">
-                      <span className="size-2.5 rounded-full" style={{ backgroundColor: CORES_REGIME[l.regime] }} />
-                      <span className={informativo ? "font-semibold text-accent-warm" : ""}>{l.regime}</span>
-                    </span>
-                  </td>
-                  <td className="py-2 text-right tabular-nums">{pct(l.participacao)}</td>
-                  <td className="py-2 text-right tabular-nums">{brl(l.valor)}</td>
-                  <td className={`py-2 text-right tabular-nums ${classe}`}>
-                    {informativo ? `(${brl(l.ibsPotencial)})` : brl(l.ibsPotencial)}
-                  </td>
-                  <td className={`py-2 text-right tabular-nums ${classe}`}>
-                    {informativo ? `(${brl(l.cbsPotencial)})` : brl(l.cbsPotencial)}
-                  </td>
-                  <td className={`py-2 text-right tabular-nums font-medium ${classe}`}>
-                    {informativo
-                      ? `(${brl(l.ibsPotencial + l.cbsPotencial)})`
-                      : brl(l.ibsPotencial + l.cbsPotencial)}
-                  </td>
-                </tr>
-              );
-            })}
-            <tr className="font-semibold">
-              <td className="py-2">Total {fornecedor ? "aproveitável" : "geral"}</td>
-              <td className="py-2 text-right tabular-nums">
-                {fornecedor ? pct(resumo.total > 0 ? (resumo.total - resumo.totalSemCredito) / resumo.total : 0) : "100,0%"}
-              </td>
-              <td className="py-2 text-right tabular-nums">
-                {brl(fornecedor ? resumo.total - resumo.totalSemCredito : resumo.total)}
-              </td>
-              <td className="py-2 text-right tabular-nums">
-                {brl(fornecedor ? resumo.totalIbs : resumo.totalIbsPotencial)}
-              </td>
-              <td className="py-2 text-right tabular-nums">
-                {brl(fornecedor ? resumo.totalCbs : resumo.totalCbsPotencial)}
-              </td>
-              <td className="py-2 text-right tabular-nums">
-                {brl(
-                  fornecedor
-                    ? resumo.totalIbs + resumo.totalCbs
-                    : resumo.totalIbsPotencial + resumo.totalCbsPotencial,
-                )}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div className="mt-6 grid gap-4 sm:grid-cols-3">
-        <div className="rounded-xl bg-gradient-to-br from-brand to-ink p-5 text-primary-foreground">
-          <p className="text-xs opacity-75">{rotulo} · IBS 18,70%</p>
-          <p className="mt-2 font-display text-2xl font-semibold leading-none">
-            {brl(fornecedor ? resumo.totalIbs : resumo.totalIbsPotencial)}
-          </p>
-        </div>
-        <div className="rounded-xl bg-gradient-to-br from-ink to-brand p-5 text-primary-foreground">
-          <p className="text-xs opacity-75">{rotulo} · CBS 9,21%</p>
-          <p className="mt-2 font-display text-2xl font-semibold leading-none">
-            {brl(fornecedor ? resumo.totalCbs : resumo.totalCbsPotencial)}
-          </p>
-        </div>
-        {fornecedor ? (
-          <div className="rounded-xl bg-accent-warm/10 p-5 ring-1 ring-accent-warm/30">
-            <p className="text-xs text-accent-warm">Crédito perdido · Simples / MEI / PF</p>
-            <p className="mt-2 font-display text-2xl font-semibold leading-none text-accent-warm">
-              {brl(resumo.totalSemCredito * (ALIQUOTA_IBS + ALIQUOTA_CBS))}
+      <div className="mt-3 space-y-2 border-y border-line py-4 text-sm leading-relaxed">
+        {resumo.linhas.map((l) => {
+          const informativo = fornecedor && !l.geraCredito;
+          return (
+            <p key={l.regime}>
+              <span className="font-semibold">{l.regime}:</span> {l.quantidade} {l.quantidade === 1 ? "empresa" : "empresas"}, {pct(l.participacao)} do total ({brl(l.valor)}). CBS de {brl(l.cbsPotencial)}{informativo ? ", apenas informativa e não somada ao crédito efetivo" : ""}.
             </p>
-            <p className="mt-1 text-[11px] text-ink/60">Não somado ao total de créditos.</p>
-          </div>
-        ) : (
-          <div className="rounded-xl bg-frost p-5 ring-1 ring-line">
-            <p className="text-xs text-muted-foreground">Débito total sobre as vendas</p>
-            <p className="mt-2 font-display text-2xl font-semibold leading-none text-brand">
-              {brl(resumo.totalIbsPotencial + resumo.totalCbsPotencial)}
-            </p>
-            <p className="mt-1 text-[11px] text-muted-foreground">100% do faturamento apresentado.</p>
-          </div>
-        )}
+          );
+        })}
+        <p className="pt-1 font-semibold">
+          {fornecedor ? "Crédito efetivo" : "Débito total"} de CBS: {brl(fornecedor ? resumo.totalCbs : resumo.totalCbsPotencial)}.
+        </p>
       </div>
 
       {resumo.totalSemCredito > 0 && (
@@ -235,16 +141,16 @@ export function SecaoParceiros({ numero, tipo, itens, onChange }: Props) {
                 <span className="font-semibold">Atenção:</span>{" "}
                 {pct(resumo.total > 0 ? resumo.totalSemCredito / resumo.total : 0)} das compras (
                 {brl(resumo.totalSemCredito)}) vêm de fornecedores do Simples Nacional, MEI ou pessoa física. O crédito
-                equivalente seria de{" "}
-                <span className="font-semibold">{brl(resumo.totalSemCredito * (ALIQUOTA_IBS + ALIQUOTA_CBS))}</span>,
+                 equivalente de CBS seria de{" "}
+                <span className="font-semibold">{brl(resumo.totalSemCredito * ALIQUOTA_CBS)}</span>,
                 mas <span className="font-semibold">não será aproveitado</span> — por isso não entra no total.
                 Recomenda-se abordar esses fornecedores sobre migração de regime ou renegociação de preço.
               </>
             ) : (
               <>
-                <span className="font-semibold">Atenção:</span> o débito de IBS/CBS incide sobre{" "}
+                <span className="font-semibold">Atenção:</span> o débito de CBS incide sobre{" "}
                 <span className="font-semibold">100% das vendas</span> apresentadas ({brl(resumo.total)}), totalizando{" "}
-                <span className="font-semibold">{brl(resumo.totalIbsPotencial + resumo.totalCbsPotencial)}</span>. Os
+                <span className="font-semibold">{brl(resumo.totalCbsPotencial)}</span>. Os
                 clientes de regime normal aproveitam esse valor como crédito; os do Simples Nacional, MEI e pessoa
                 física ({pct(resumo.total > 0 ? resumo.totalSemCredito / resumo.total : 0)} do faturamento) não
                 aproveitam, o que exige atenção na formação de preço.

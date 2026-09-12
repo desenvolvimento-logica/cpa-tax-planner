@@ -9,8 +9,7 @@ type Props = {
 };
 
 const ESPERADOS = [
-  "Consulta CNPJ (dados cadastrais e CNAEs)",
-  "Declaração de faturamento",
+  "Declaração de faturamento (consulta automática do CNPJ e dos CNAEs)",
   "Perfil tributário de clientes e fornecedores (PDF ou planilha Excel)",
   "Detalhamento da Simulação da Reforma Tributária (2027)",
   "Consulta Planejamento Tributário (2027)",
@@ -50,8 +49,8 @@ export function SecaoImportacao({ estudo, onImportado, onAbrirEstudo }: Props) {
       <p className="font-display text-sm font-semibold uppercase tracking-widest text-brand">Etapa 00 · Importação</p>
       <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight">Importe os relatórios do cliente</h2>
       <p className="mt-2 max-w-[70ch] text-sm text-ink/70">
-        Envie os relatórios em PDF gerados para este cliente. O estudo é preenchido automaticamente: dados cadastrais,
-        CNAEs, faturamento, clientes e fornecedores por regime e as simulações de 2027.
+        Envie os relatórios em PDF gerados para este cliente. Pela declaração de faturamento, o sistema consulta o CNPJ
+        e completa automaticamente os dados cadastrais e CNAEs, além de preencher as demais informações do estudo.
       </p>
 
       <div
