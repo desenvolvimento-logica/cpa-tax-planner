@@ -108,7 +108,7 @@ export const consultarCnpjPublico = createServerFn({ method: "POST" })
     if (cnpj.length !== 14) throw new Error("CNPJ inválido na declaração de faturamento.");
 
     const resposta = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`, {
-      headers: { Accept: "application/json" },
+      headers: { Accept: "application/json", "User-Agent": "Mozilla/5.0 (compatible; EstudoTributario/1.0)" },
       signal: AbortSignal.timeout(12_000),
     });
     if (!resposta.ok) throw new Error(`Não foi possível consultar o cadastro público deste CNPJ (${resposta.status}).`);
