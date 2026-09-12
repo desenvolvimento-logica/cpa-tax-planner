@@ -116,18 +116,54 @@ export function SecaoParceiros({ numero, tipo, itens, onChange }: Props) {
       <h3 className="mt-8 font-display text-xs font-semibold uppercase tracking-widest text-ink/60">
         Consolidado por regime
       </h3>
-      <div className="mt-3 space-y-2 border-y border-line py-4 text-sm leading-relaxed">
-        {resumo.linhas.map((l) => {
-          const informativo = fornecedor && !l.geraCredito;
-          return (
-            <p key={l.regime}>
-              <span className="font-semibold">{l.regime}:</span> {l.quantidade} {l.quantidade === 1 ? "empresa" : "empresas"}, {pct(l.participacao)} do total ({brl(l.valor)}). CBS de {brl(l.cbsPotencial)}{informativo ? ", apenas informativa e não somada ao crédito efetivo" : ""}.
-            </p>
-          );
-        })}
-        <p className="pt-1 font-semibold">
-          {fornecedor ? "Crédito efetivo" : "Débito total"} de CBS: {brl(fornecedor ? resumo.totalCbs : resumo.totalCbsPotencial)}.
-        </p>
+      <div className="mt-3 overflow-x-auto">
+        <table className="w-full min-w-[520px] text-sm">
+          <thead>
+            <tr className="border-b border-line text-[11px] uppercase tracking-widest text-muted-foreground">
+              <th className="py-2 text-left font-medium">Regime</th>
+              <th className="py-2 text-right font-medium">Empresas</th>
+              <th className="py-2 text-right font-medium">%</th>
+              <th className="py-2 text-right font-medium">Valor</th>
+              <th className="py-2 text-right font-medium">{rotulo} CBS</th>
+            </tr>
+          </thead>
+          <tbody>
+            {resumo.linhas.map((l) => {
+              const informativo = fornecedor && !l.geraCredito;
+              const classe = informativo ? "text-accent-warm/80 italic" : "";
+              return (
+                <tr key={l.regime} className="border-b border-line/70">
+                  <td className={`py-2 ${informativo ? "font-semibold text-accent-warm" : ""}`}>{l.regime}</td>
+                  <td className="py-2 text-right tabular-nums">{l.quantidade}</td>
+                  <td className="py-2 text-right tabular-nums">{pct(l.participacao)}</td>
+                  <td className="py-2 text-right tabular-nums">{brl(l.valor)}</td>
+                  <td className={`py-2 text-right tabular-nums ${classe}`}>
+                    {informativo ? `(${brl(l.cbsPotencial)})` : brl(l.cbsPotencial)}
+                  </td>
+                </tr>
+              );
+            })}
+            <tr className="font-semibold">
+              <td className="py-2">Total {fornecedor ? "aproveitável" : "geral"}</td>
+              <td className="py-2 text-right tabular-nums">
+                {fornecedor
+                  ? resumo.linhas.filter((l) => l.geraCredito).reduce((total, l) => total + l.quantidade, 0)
+                  : itens.length}
+              </td>
+              <td className="py-2 text-right tabular-nums">
+                {fornecedor
+                  ? pct(resumo.total > 0 ? (resumo.total - resumo.totalSemCredito) / resumo.total : 0)
+                  : "100,0%"}
+              </td>
+              <td className="py-2 text-right tabular-nums">
+                {brl(fornecedor ? resumo.total - resumo.totalSemCredito : resumo.total)}
+              </td>
+              <td className="py-2 text-right tabular-nums">
+                {brl(fornecedor ? resumo.totalCbs : resumo.totalCbsPotencial)}
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       {resumo.totalSemCredito > 0 && (
