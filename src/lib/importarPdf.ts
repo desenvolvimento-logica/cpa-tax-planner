@@ -197,7 +197,7 @@ export function parseCnpj(texto: string): { cadastro: Partial<Cadastro>; cnaes: 
   };
 }
 
-export function parseFaturamento(texto: string): { faturamento: number[]; regimeAtual: string } {
+export function parseFaturamento(texto: string): { faturamento: number[]; regimeAtual: string; cnpj: string } {
   const faturamento = zeros();
   for (const linha of texto.split("\n")) {
     const semAcento = linha
