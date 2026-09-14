@@ -108,7 +108,7 @@ function extrairTributacoesNacionais(linhas: Linha[]): TributacaoNacional[] {
       (c.includes("trib") && c.includes("nacional")) || c === "ctribnac" || c === "codigo tributacao nacional",
     );
     if (iCodigo < 0) continue;
-    const iDescricao = cols.findIndex((c) => c.includes("descricao") || c.includes("servico"));
+    const iDescricao = cols.findIndex((c) => c === "descricao do servico" || c.startsWith("descricao do servico"));
     const iValor = cols.findIndex((c) =>
       c.includes("valor contab") ||
       (c.includes("valor") && (c.includes("nota") || c.includes("servico"))) ||
@@ -117,9 +117,13 @@ function extrairTributacoesNacionais(linhas: Linha[]): TributacaoNacional[] {
     const iAliquota = cols.findIndex((c) => c.includes("iss") && (c.includes("aliq") || c.includes("percent")));
     const mapa = new Map<string, TributacaoNacional>();
     for (const linha of linhas.slice(i + 1)) {
-      const codigo = String(linha[iCodigo] ?? "").trim();
-      if (!codigo) continue;
-      const descricao = iDescricao >= 0 ? String(linha[iDescricao] ?? "").trim() : "";
+      const codigoCompleto = String(linha[iCodigo] ?? "").trim();
+      if (!codigoCompleto) continue;
+      const partesCodigo = codigoCompleto.match(/^([\d.\-/]+)\s*[-–—]\s*(.+)$/);
+      const codigo = partesCodigo?.[1]?.trim() || codigoCompleto;
+      const descricaoOficial = partesCodigo?.[2]?.trim() || "";
+      const descricaoDaNota = iDescricao >= 0 ? String(linha[iDescricao] ?? "").trim() : "";
+      const descricao = descricaoOficial || descricaoDaNota;
       const valorNotas = iValor >= 0 ? paraNumero(linha[iValor]) : 0;
       let aliquotaIss = iAliquota >= 0 ? paraNumero(linha[iAliquota]) : 0;
       if (aliquotaIss > 0 && aliquotaIss <= 1) aliquotaIss *= 100;
