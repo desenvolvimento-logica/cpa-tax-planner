@@ -16,6 +16,7 @@ const ESPERADOS = [
   "Declaração de faturamento (consulta automática do CNPJ e dos CNAEs)",
   "Resumo Mensal da folha (Base total da seção INSS)",
   "Perfil tributário de clientes e fornecedores (PDF ou planilha Excel)",
+  "Notas emitidas em planilha (Código de Tributação Nacional)",
   "Comparativo de regimes tributários — Memória de Cálculo",
   "Consultas de CNAE (o que compreende e não compreende)",
 ];

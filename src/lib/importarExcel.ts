@@ -1,4 +1,4 @@
-import type { Parceiro, Regime } from "./estudo";
+import type { Parceiro, Regime, TributacaoNacional } from "./estudo";
 import { REGIMES } from "./estudo";
 
 let contador = 0;
@@ -101,10 +101,48 @@ function extrairFaturamento(linhas: Linha[]): number[] | null {
   return null;
 }
 
+function extrairTributacoesNacionais(linhas: Linha[]): TributacaoNacional[] {
+  for (let i = 0; i < Math.min(linhas.length, 30); i++) {
+    const cols = (linhas[i] ?? []).map((c) => semAcento(String(c ?? "")));
+    const iCodigo = cols.findIndex((c) =>
+      (c.includes("trib") && c.includes("nacional")) || c === "ctribnac" || c === "codigo tributacao nacional",
+    );
+    if (iCodigo < 0) continue;
+    const iDescricao = cols.findIndex((c) => c.includes("descricao") || c.includes("servico"));
+    const iValor = cols.findIndex((c) =>
+      c.includes("valor contab") ||
+      (c.includes("valor") && (c.includes("nota") || c.includes("servico"))) ||
+      c === "valor",
+    );
+    const iAliquota = cols.findIndex((c) => c.includes("iss") && (c.includes("aliq") || c.includes("percent")));
+    const mapa = new Map<string, TributacaoNacional>();
+    for (const linha of linhas.slice(i + 1)) {
+      const codigo = String(linha[iCodigo] ?? "").trim();
+      if (!codigo) continue;
+      const descricao = iDescricao >= 0 ? String(linha[iDescricao] ?? "").trim() : "";
+      const valorNotas = iValor >= 0 ? paraNumero(linha[iValor]) : 0;
+      let aliquotaIss = iAliquota >= 0 ? paraNumero(linha[iAliquota]) : 0;
+      if (aliquotaIss > 0 && aliquotaIss <= 1) aliquotaIss *= 100;
+      const atual = mapa.get(codigo);
+      if (atual) {
+        atual.valorNotas += valorNotas;
+        if (!atual.descricao && descricao) atual.descricao = descricao;
+        if (!atual.aliquotaIss && aliquotaIss) atual.aliquotaIss = aliquotaIss;
+      } else {
+        mapa.set(codigo, { id: novoId(), codigo, descricao, valorNotas, aliquotaIss });
+      }
+    }
+    return [...mapa.values()]
+      .map((item) => ({ ...item, valorNotas: Math.round(item.valorNotas * 100) / 100 }))
+      .sort((a, b) => b.valorNotas - a.valorNotas || a.codigo.localeCompare(b.codigo, "pt-BR"));
+  }
+  return [];
+}
+
 /** Lê a planilha de regimes (abas de entradas/compras e vendas). */
 export async function parsePlanilhaRegimes(
   file: File,
-): Promise<{ clientes: Parceiro[]; fornecedores: Parceiro[]; faturamento: number[] | null }> {
+): Promise<{ clientes: Parceiro[]; fornecedores: Parceiro[]; faturamento: number[] | null; tributacoesNacionais: TributacaoNacional[] }> {
   const XLSX = await import("xlsx");
   const buffer = await file.arrayBuffer();
   const wb = XLSX.read(buffer, { type: "array" });
@@ -112,11 +150,24 @@ export async function parsePlanilhaRegimes(
   let clientes: Parceiro[] = [];
   let fornecedores: Parceiro[] = [];
   let faturamento: number[] | null = null;
+  let tributacoesNacionais: TributacaoNacional[] = [];
 
   for (const nomeAba of wb.SheetNames) {
     const aba = wb.Sheets[nomeAba];
     if (!aba) continue;
     const linhas = XLSX.utils.sheet_to_json<Linha>(aba, { header: 1, raw: true, defval: "" });
+    const codigos = extrairTributacoesNacionais(linhas);
+    if (codigos.length) {
+      const existentes = new Map(tributacoesNacionais.map((item) => [item.codigo, item]));
+      for (const item of codigos) {
+        const atual = existentes.get(item.codigo);
+        if (atual) atual.valorNotas += item.valorNotas;
+        else {
+          tributacoesNacionais.push(item);
+          existentes.set(item.codigo, item);
+        }
+      }
+    }
     const itens = extrairParceiros(linhas);
     if (!itens.length) {
       faturamento = faturamento ?? extrairFaturamento(linhas);
@@ -129,5 +180,5 @@ export async function parsePlanilhaRegimes(
     else fornecedores = fornecedores.concat(itens);
   }
 
-  return { clientes, fornecedores, faturamento };
+  return { clientes, fornecedores, faturamento, tributacoesNacionais };
 }

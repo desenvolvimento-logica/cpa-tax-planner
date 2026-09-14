@@ -5,3 +5,5 @@
 - [x] Detalhar e padronizar a ordem dos impostos nos quatro regimes.
 - [x] Criar histórico local com salvar, abrir e excluir estudos por cliente.
 - [x] Validar totais, desktop, celular e persistência após recarregar.
+- [x] Ler o Código de Tributação Nacional das planilhas de notas emitidas.
+- [x] Permitir alíquota de ISS manual por código e apresentar o resumo no estudo e diagnóstico.

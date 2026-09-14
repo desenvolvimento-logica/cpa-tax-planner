@@ -303,6 +303,33 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
             informado na seção INSS do Resumo da Folha.
           </p>
         ) : null}
+        {estudo.tributacoesNacionais.length > 0 ? (
+          <>
+            <Titulo>Códigos de Tributação Nacional das notas emitidas</Titulo>
+            <table className="mt-3 w-full border-collapse text-[8.5pt]">
+              <thead>
+                <tr className="bg-frost text-center">
+                  <th className="border border-line px-2 py-1.5">Código</th>
+                  <th className="border border-line px-2 py-1.5">Descrição</th>
+                  <th className="border border-line px-2 py-1.5">Notas emitidas</th>
+                  <th className="border border-line px-2 py-1.5">ISS</th>
+                  <th className="border border-line px-2 py-1.5">ISS estimado</th>
+                </tr>
+              </thead>
+              <tbody className="text-center">
+                {estudo.tributacoesNacionais.map((item) => (
+                  <tr key={item.id}>
+                    <td className="border border-line px-2 py-1.5 font-medium">{item.codigo}</td>
+                    <td className="border border-line px-2 py-1.5">{item.descricao || "—"}</td>
+                    <td className="border border-line px-2 py-1.5">{brlExato(item.valorNotas)}</td>
+                    <td className="border border-line px-2 py-1.5">{item.aliquotaIss.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}%</td>
+                    <td className="border border-line px-2 py-1.5">{brlExato(item.valorNotas * item.aliquotaIss / 100)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        ) : null}
         <TabelaPerfil
           titulo="Perfil do cliente"
           colunaValor="Faturamento"
