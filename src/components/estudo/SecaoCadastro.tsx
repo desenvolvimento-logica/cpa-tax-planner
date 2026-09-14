@@ -74,19 +74,13 @@ export function SecaoCnaes({
     >
       <div className="grid gap-4 lg:grid-cols-2">
         {cnaes.map((c) => (
-          <article key={c.id} className="clip-bar bg-frost p-4 ring-1 ring-line">
-            <div className="flex items-center gap-2">
+          <article key={c.id} className="rounded-md bg-frost p-4 ring-1 ring-line">
+            <div className="flex items-start gap-2">
               <CampoTexto
                 valor={c.codigo}
                 onChange={(v) => atualizar(c.id, { codigo: v })}
                 placeholder="0000-0/00"
                 className="w-32 font-display font-semibold"
-              />
-              <CampoTexto
-                valor={c.anexo}
-                onChange={(v) => atualizar(c.id, { anexo: v })}
-                placeholder="Anexo III"
-                className="w-28 rounded bg-brand/10 text-center text-xs font-semibold text-brand"
               />
               <button
                 type="button"
@@ -97,6 +91,13 @@ export function SecaoCnaes({
                 ×
               </button>
             </div>
+            <CampoTexto
+              valor={c.anexo}
+              onChange={(v) => atualizar(c.id, { anexo: v })}
+              placeholder="Anexo V — sujeito ao Fator R"
+              multiline
+              className="mt-2 min-h-8 rounded bg-brand/10 text-center text-xs font-semibold leading-relaxed text-brand"
+            />
             <CampoTexto
               valor={c.descricao}
               onChange={(v) => atualizar(c.id, { descricao: v })}
@@ -110,7 +111,7 @@ export function SecaoCnaes({
               onChange={(v) => atualizar(c.id, { compreende: v })}
               placeholder="O que esta atividade abrange"
               multiline
-              className="text-xs"
+              className="min-h-10 text-xs leading-relaxed"
             />
             <p className="mt-2 px-2 text-[11px] uppercase tracking-widest text-accent-warm">Não compreende</p>
             <CampoTexto
@@ -118,7 +119,7 @@ export function SecaoCnaes({
               onChange={(v) => atualizar(c.id, { naoCompreende: v })}
               placeholder="O que fica de fora desta atividade"
               multiline
-              className="text-xs"
+              className="min-h-10 text-xs leading-relaxed"
             />
           </article>
         ))}

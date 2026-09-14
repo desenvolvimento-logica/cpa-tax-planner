@@ -48,7 +48,7 @@ const ETAPAS = [
 ];
 
 function Index() {
-  const { estudo, setEstudo, atualizar } = useEstudo();
+  const { estudo, setEstudo, atualizar, historico, salvarEstudo, abrirEstudo, excluirEstudo } = useEstudo();
   const [etapa, setEtapa] = useState("importacao");
   const [documentoAberto, setDocumentoAberto] = useState(false);
 
@@ -97,19 +97,18 @@ function Index() {
         <div className="pointer-events-none absolute -right-24 top-1/3 size-[420px] -rotate-6 rounded-full bg-accent-warm/10 blur-3xl" />
 
         <header className="relative mx-auto max-w-7xl px-6 pb-8 pt-10">
-          <div className="flex items-center justify-between text-xs font-medium uppercase tracking-[0.2em] text-brand">
-            <span />
-            <span className="hidden sm:inline">Confidencial — Estudo para o cliente</span>
+          <div className="text-center text-[10px] font-medium uppercase leading-relaxed tracking-[0.16em] text-brand sm:text-xs sm:tracking-[0.2em]">
+            Confidencial — Estudo para o cliente · Análise baseada nos dados fiscais da empresa referentes a 2026
           </div>
 
-          <div className="mt-6 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-[52ch]">
+          <div className="mt-6 flex flex-col items-center gap-6">
+            <div className="w-full text-center">
               <img
                 src={logoLogica.url}
                 alt="Lógica na Reforma — da contabilidade à estratégia"
-                className="mb-5 h-28 w-auto mix-blend-multiply lg:h-40"
+                className="mx-auto mb-5 h-28 w-auto mix-blend-multiply lg:h-40"
               />
-              <h1 className="text-balance font-display text-4xl font-semibold leading-none tracking-tighter lg:text-5xl">
+              <h1 className="whitespace-nowrap font-display text-lg font-semibold leading-none sm:text-2xl lg:text-4xl">
                 Estudo do <span className="text-brand">Simples Nacional Híbrido</span>
               </h1>
               <p className="mt-4 text-pretty text-base text-ink/70">
@@ -117,17 +116,28 @@ function Index() {
               </p>
             </div>
 
-            <div className="no-print flex items-center gap-3">
+            <div className="no-print flex flex-wrap items-center justify-center gap-3">
               <div className="text-right">
                 <p className="text-[11px] uppercase tracking-[0.15em] text-ink/50">Cenário</p>
                 <p className="font-display text-2xl font-semibold leading-none">2027</p>
               </div>
               <button
                 type="button"
-                onClick={() => setEstudo({ ...estudoVazio, escritorio: estudo.escritorio })}
+                onClick={() => {
+                  if (estudo.cadastro.cnpj) salvarEstudo();
+                  setEstudo({ ...estudoVazio, escritorio: estudo.escritorio });
+                  setEtapa("importacao");
+                }}
                 className="rounded-full px-4 py-2.5 text-sm font-medium text-ink/70 ring-1 ring-line transition-colors hover:bg-white/70"
               >
                 Novo estudo
+              </button>
+              <button
+                type="button"
+                onClick={() => salvarEstudo()}
+                className="rounded-full px-4 py-2.5 text-sm font-medium text-brand ring-1 ring-brand/30 transition-colors hover:bg-white/70"
+              >
+                Salvar estudo
               </button>
               <button
                 type="button"
@@ -166,6 +176,9 @@ function Index() {
               estudo={estudo}
               onImportado={(novo) => setEstudo(novo)}
               onAbrirEstudo={() => irPara("cadastro")}
+              historico={historico}
+              onAbrirSalvo={abrirEstudo}
+              onExcluirSalvo={excluirEstudo}
             />
           ) : (
           <>

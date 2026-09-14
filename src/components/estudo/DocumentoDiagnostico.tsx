@@ -5,6 +5,8 @@ import {
   CENARIOS,
   agruparPorRegime,
   brlExato,
+  ORDEM_TRIBUTOS,
+  ordenarTributos,
   pct,
   soma,
   type Estudo,
@@ -151,7 +153,7 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
   const cenarios = CENARIOS.map((c) => ({
     ...c,
     total: soma(estudo.simulacoes[c.key]),
-    tributos: (estudo.simulacoes.tributos?.[c.key] ?? []).filter((t) => t.valor !== 0),
+    tributos: ordenarTributos(estudo.simulacoes.tributos?.[c.key] ?? []),
   })).filter((c) => c.total > 0);
 
   const temCnaes = estudo.cnaes.length > 0;
@@ -419,7 +421,7 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
                 </tr>
               </thead>
               <tbody className="text-center">
-                {Array.from(new Set(cenarios.flatMap((c) => c.tributos.map((t) => t.nome)))).map((nome) => (
+                {ORDEM_TRIBUTOS.map((nome) => (
                   <tr key={nome}>
                     <td className="border border-line px-2 py-1.5 font-medium">{nome}</td>
                     {cenarios.map((c) => {
