@@ -284,8 +284,8 @@ export function parseMemoriaCalculo(texto: string): Simulacoes {
     { nome: "ISS", valores: atuais.map((v) => v[6] ?? 0) },
   ]);
   const hibridoTributos = somarTributos([
-    { nome: "IRPJ", valores: hibridos.map((v) => v[2] ?? 0) },
-    { nome: "CSLL", valores: hibridos.map((v) => v[3] ?? 0) },
+    { nome: "IRPJ", valores: hibridos.map((v) => v[1] ?? 0) },
+    { nome: "CSLL", valores: hibridos.map((v) => v[2] ?? 0) },
     {
       nome: "INSS/CPP",
       valores: hibridos.map((v) => {
