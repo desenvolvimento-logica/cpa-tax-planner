@@ -38,7 +38,7 @@ export function SecaoDiagnostico({ diagnostico, onChange, onGerar }: Props) {
 
   return (
     <Painel
-      numero="06"
+      numero="07"
       titulo="Diagnóstico para o cliente"
       acessorio={
         <button
