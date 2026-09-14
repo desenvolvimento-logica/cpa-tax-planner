@@ -143,6 +143,7 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
   const clientes = agruparPorRegime(estudo.clientes);
   const fornecedores = agruparPorRegime(estudo.fornecedores);
   const faturamento = soma(estudo.faturamento);
+  const folha = soma(estudo.folha);
   const participacaoNormal = clientes.linhas
     .filter((l) => l.geraCredito)
     .reduce((a, b) => a + b.participacao, 0);
@@ -294,6 +295,12 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
            seu faturamento se distribui entre os perfis de cliente e quanto de débito de CBS cada perfil
           representa:
         </p>
+        {folha > 0 ? (
+          <p className="mt-3 w-full text-justify text-[10.5pt] leading-relaxed text-ink/85">
+            No mesmo período, a folha de pagamento acumulada foi de {brlExato(folha)}, considerando o valor Base total
+            informado na seção INSS do Resumo da Folha.
+          </p>
+        ) : null}
         <TabelaPerfil
           titulo="Perfil do cliente"
           colunaValor="Faturamento"

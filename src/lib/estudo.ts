@@ -107,6 +107,7 @@ export type Estudo = {
   cadastro: Cadastro;
   cnaes: CnaeItem[];
   faturamento: number[];
+  folha: number[];
   fornecedores: Parceiro[];
   clientes: Parceiro[];
   simulacoes: Simulacoes;
@@ -115,10 +116,10 @@ export type Estudo = {
 };
 
 export const CENARIOS = [
-  { key: "simplesAtual", label: "Simples Nacional — atual", fonte: "Detalhamento Simulação de Cálculo da Reforma Tributária · 2027" },
-  { key: "simplesHibrido", label: "Simples Nacional — modelo híbrido", fonte: "Consulta Planejamento Tributário · 2027" },
-  { key: "lucroPresumido", label: "Lucro Presumido", fonte: "Consulta Planejamento Tributário · 2027" },
-  { key: "lucroReal", label: "Lucro Real", fonte: "Consulta Planejamento Tributário · 2027" },
+  { key: "simplesAtual", label: "Simples Nacional — atual", fonte: "Comparativo de regimes tributários — Memória de Cálculo" },
+  { key: "simplesHibrido", label: "Simples Nacional — modelo híbrido", fonte: "Comparativo de regimes tributários — Memória de Cálculo" },
+  { key: "lucroPresumido", label: "Lucro Presumido", fonte: "Comparativo de regimes tributários — Memória de Cálculo" },
+  { key: "lucroReal", label: "Lucro Real", fonte: "Comparativo de regimes tributários — Memória de Cálculo" },
 ] as const satisfies ReadonlyArray<{ key: CenarioKey; label: string; fonte: string }>;
 
 const zeros = () => Array.from({ length: 12 }, () => 0);
@@ -169,6 +170,7 @@ export const estudoVazio: Estudo = {
   },
   cnaes: [],
   faturamento: zeros(),
+  folha: zeros(),
   fornecedores: [],
   clientes: [],
   simulacoes: {
@@ -232,6 +234,7 @@ export const estudoExemplo: Estudo = {
   ],
   // Faturamento declarado de 01/01/2026 a 31/07/2026 — total R$ 1.358.994,30
   faturamento: [217281.3, 187029.3, 170205.5, 191820.8, 188320.8, 198975.5, 205361.1, 0, 0, 0, 0, 0],
+  folha: [69425.6, 66100, 68473.45, 65279, 63928.81, 73147.38, 0, 0, 0, 0, 0, 0],
   fornecedores: [
     { id: "f1", nome: "UNIMED CAMPINAS COOPERATIVA DE TRABALHO MEDICO", cnpj: "46.124.624/0001-11", regime: "Normal", valor: 61211.79 },
     { id: "f2", nome: "PLUXEE BENEFICIOS BRASIL S.A", cnpj: "69.034.668/0001-56", regime: "Normal", valor: 40404.0 },

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { SecaoImportacao } from "@/components/estudo/SecaoImportacao";
 import { SecaoCadastro, SecaoCnaes } from "@/components/estudo/SecaoCadastro";
 import { SecaoFaturamento } from "@/components/estudo/SecaoFaturamento";
+import { SecaoFolha } from "@/components/estudo/SecaoFolha";
 import { SecaoParceiros } from "@/components/estudo/SecaoParceiros";
 import { SecaoSimulacoes } from "@/components/estudo/SecaoSimulacoes";
 import { SecaoDiagnostico } from "@/components/estudo/SecaoDiagnostico";
@@ -40,9 +41,10 @@ const ETAPAS = [
   { id: "cadastro", numero: "01", nome: "Cadastral" },
   { id: "cnaes", numero: "02", nome: "CNAEs" },
   { id: "faturamento", numero: "03", nome: "Faturamento" },
-  { id: "regimes", numero: "04", nome: "Regimes" },
-  { id: "simulacao", numero: "05", nome: "Simulação" },
-  { id: "diagnostico", numero: "06", nome: "Diagnóstico" },
+  { id: "folha", numero: "04", nome: "Folha" },
+  { id: "regimes", numero: "05", nome: "Regimes" },
+  { id: "simulacao", numero: "06", nome: "Simulação" },
+  { id: "diagnostico", numero: "07", nome: "Diagnóstico" },
 ];
 
 function Index() {
@@ -137,7 +139,7 @@ function Index() {
             </div>
           </div>
 
-          <nav className="no-print mt-8 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
+          <nav className="no-print mt-8 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-8">
             {ETAPAS.map((e) => (
               <button
                 key={e.id}
@@ -176,15 +178,18 @@ function Index() {
           <div id="faturamento" className="min-w-0 scroll-mt-6">
             <SecaoFaturamento valores={estudo.faturamento} onChange={(faturamento) => atualizar({ faturamento })} />
           </div>
+          <div id="folha" className="min-w-0 scroll-mt-6">
+            <SecaoFolha valores={estudo.folha} onChange={(folha) => atualizar({ folha })} />
+          </div>
           <div id="regimes" className="grid min-w-0 scroll-mt-6 gap-5">
             <SecaoParceiros
-              numero="04a"
+              numero="05a"
               tipo="fornecedores"
               itens={estudo.fornecedores}
               onChange={(fornecedores) => atualizar({ fornecedores })}
             />
             <SecaoParceiros
-              numero="04b"
+              numero="05b"
               tipo="clientes"
               itens={estudo.clientes}
               onChange={(clientes) => atualizar({ clientes })}
