@@ -1,11 +1,15 @@
 import { useRef, useState } from "react";
 import { estudoVazio, type Estudo } from "@/lib/estudo";
 import { importarArquivos, ROTULO_TIPO, type ResultadoArquivo } from "@/lib/importarPdf";
+import type { EstudoSalvo } from "@/lib/useEstudo";
 
 type Props = {
   estudo: Estudo;
   onImportado: (estudo: Estudo) => void;
   onAbrirEstudo: () => void;
+  historico: EstudoSalvo[];
+  onAbrirSalvo: (id: string) => void;
+  onExcluirSalvo: (id: string) => void;
 };
 
 const ESPERADOS = [
@@ -16,7 +20,7 @@ const ESPERADOS = [
   "Consultas de CNAE (o que compreende e não compreende)",
 ];
 
-export function SecaoImportacao({ estudo, onImportado, onAbrirEstudo }: Props) {
+export function SecaoImportacao({ estudo, onImportado, onAbrirEstudo, historico, onAbrirSalvo, onExcluirSalvo }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [substituir, setSubstituir] = useState(true);
   const [processando, setProcessando] = useState(false);
@@ -152,6 +156,44 @@ export function SecaoImportacao({ estudo, onImportado, onAbrirEstudo }: Props) {
         <p className="text-xs text-ink/55">
           Você também pode abrir o estudo e ajustar qualquer informação manualmente.
         </p>
+      </div>
+
+      <div className="mt-8 border-t border-line pt-6">
+        <h3 className="font-display text-sm font-semibold uppercase tracking-widest text-brand">Estudos salvos</h3>
+        {historico.length === 0 ? (
+          <p className="mt-3 text-sm text-ink/55">Os estudos realizados aparecerão aqui para consulta posterior.</p>
+        ) : (
+          <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {historico.map((item) => (
+              <article key={item.id} className="rounded-md bg-white/70 p-4 ring-1 ring-line">
+                <p className="font-display font-semibold">{item.nome}</p>
+                <p className="mt-1 text-xs text-ink/60">{item.cnpj || "CNPJ não informado"}</p>
+                <p className="mt-1 text-xs text-ink/50">
+                  Atualizado em {new Date(item.atualizadoEm).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
+                </p>
+                <div className="mt-4 flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onAbrirSalvo(item.id);
+                      onAbrirEstudo();
+                    }}
+                    className="rounded-full bg-brand px-4 py-2 text-xs font-medium text-primary-foreground"
+                  >
+                    Abrir estudo
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onExcluirSalvo(item.id)}
+                    className="rounded-full px-4 py-2 text-xs font-medium text-destructive ring-1 ring-destructive/30"
+                  >
+                    Excluir
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

@@ -71,6 +71,35 @@ export type CenarioKey = "simplesAtual" | "simplesHibrido" | "lucroPresumido" | 
 
 export type TributoLinha = { nome: string; valor: number };
 
+export const ORDEM_TRIBUTOS = [
+  "IRPJ",
+  "Adicional IRPJ",
+  "CSLL",
+  "INSS/CPP",
+  "ISS",
+  "PIS/Pasep",
+  "COFINS",
+  "CBS",
+] as const;
+
+const normalizarNomeTributo = (nome: string) => {
+  const chave = nome.toLowerCase().replace(/\s+/g, " ").trim();
+  if (chave === "pis" || chave === "pis/pasep") return "PIS/Pasep";
+  if (chave.includes("adicional") && chave.includes("irpj")) return "Adicional IRPJ";
+  if (chave.includes("inss") || chave === "cpp") return "INSS/CPP";
+  if (chave.startsWith("cbs")) return "CBS";
+  return nome;
+};
+
+export function ordenarTributos(tributos: TributoLinha[]): TributoLinha[] {
+  const consolidados = new Map<string, number>();
+  for (const tributo of tributos) {
+    const nome = normalizarNomeTributo(tributo.nome);
+    consolidados.set(nome, (consolidados.get(nome) ?? 0) + tributo.valor);
+  }
+  return ORDEM_TRIBUTOS.map((nome) => ({ nome, valor: consolidados.get(nome) ?? 0 }));
+}
+
 export type Simulacoes = {
   simplesAtual: number[];
   simplesHibrido: number[];

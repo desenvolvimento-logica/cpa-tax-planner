@@ -1,4 +1,4 @@
-import { brl, CENARIOS, MESES, soma, type CenarioKey, type Simulacoes } from "@/lib/estudo";
+import { brl, CENARIOS, MESES, ordenarTributos, soma, type CenarioKey, type Simulacoes } from "@/lib/estudo";
 import { CampoValor, Painel } from "./campos";
 
 const CORES: Record<string, string> = {
@@ -25,7 +25,7 @@ export function SecaoSimulacoes({
   const editar = (key: CenarioKey, mes: number, valor: number) =>
     onChange({ ...simulacoes, [key]: simulacoes[key].map((v, i) => (i === mes ? valor : v)) });
 
-  const tributosDe = (key: CenarioKey) => (simulacoes.tributos?.[key] ?? []).filter((t) => t.valor !== 0);
+  const tributosDe = (key: CenarioKey) => ordenarTributos(simulacoes.tributos?.[key] ?? []);
 
   return (
     <Painel
@@ -110,20 +110,16 @@ export function SecaoSimulacoes({
                 <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
                   Por tributo (ano)
                 </p>
-                {tributos.length > 0 ? (
-                  <ul className="mt-2 space-y-1 text-xs">
-                    {tributos.map((trib) => (
-                      <li key={trib.nome} className="flex items-baseline justify-between gap-2">
-                        <span className="text-ink/70">{trib.nome}</span>
-                        <span className="tabular-nums font-medium">{brl(trib.valor)}</span>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    Detalhamento por tributo não disponível neste relatório.
-                  </p>
-                )}
+                <ul className="mt-2 space-y-1 text-xs">
+                  {tributos.map((trib) => (
+                    <li key={trib.nome} className="flex items-baseline justify-between gap-2">
+                      <span className="text-ink/70">{trib.nome}</span>
+                      <span className={`tabular-nums font-medium ${trib.valor === 0 ? "text-muted-foreground" : ""}`}>
+                        {trib.valor === 0 ? "—" : brl(trib.valor)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
           );
