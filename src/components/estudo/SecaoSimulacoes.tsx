@@ -29,7 +29,7 @@ export function SecaoSimulacoes({
 
   return (
     <Painel
-      numero="05"
+      numero="06"
       titulo="Simulações tributárias · cenário 2027"
       acessorio={<span className="text-[11px] uppercase tracking-widest text-muted-foreground">Valores mensais em R$</span>}
     >
@@ -131,9 +131,8 @@ export function SecaoSimulacoes({
       </div>
 
       <p className="mt-4 text-xs text-muted-foreground">
-        Fontes: Simples Nacional atual — relatório <em>Detalhamento Simulação de Cálculo da Reforma Tributária</em>,
-        cenário 2027. Simples Nacional modelo híbrido, Lucro Presumido e Lucro Real — relatório <em>Consulta
-        Planejamento Tributário</em>, cenário 2027.
+        Fonte: relatório <em>Comparativo de regimes tributários — Memória de Cálculo</em>, com os valores mensais e a
+        composição de cada cenário.
       </p>
 
     </Painel>

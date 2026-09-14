@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { diagnosticoPadrao, estudoExemplo, type Estudo } from "./estudo";
 
-const CHAVE = "estudo-jgwebcom-v8";
+const CHAVE = "estudo-jgwebcom-v9";
 
 export function useEstudo() {
   const [estudo, setEstudo] = useState<Estudo>(estudoExemplo);
@@ -15,6 +15,7 @@ export function useEstudo() {
         setEstudo({
           ...estudoExemplo,
           ...salvo,
+          folha: salvo.folha ?? estudoExemplo.folha,
           diagnostico: { ...diagnosticoPadrao, ...(salvo.diagnostico ?? {}) },
         });
       }

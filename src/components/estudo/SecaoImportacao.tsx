@@ -10,9 +10,9 @@ type Props = {
 
 const ESPERADOS = [
   "Declaração de faturamento (consulta automática do CNPJ e dos CNAEs)",
+  "Resumo Mensal da folha (Base total da seção INSS)",
   "Perfil tributário de clientes e fornecedores (PDF ou planilha Excel)",
-  "Detalhamento da Simulação da Reforma Tributária (2027)",
-  "Consulta Planejamento Tributário (2027)",
+  "Comparativo de regimes tributários — Memória de Cálculo",
   "Consultas de CNAE (o que compreende e não compreende)",
 ];
 
@@ -50,7 +50,8 @@ export function SecaoImportacao({ estudo, onImportado, onAbrirEstudo }: Props) {
       <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight">Importe os relatórios do cliente</h2>
       <p className="mt-2 max-w-[70ch] text-sm text-ink/70">
         Envie os relatórios em PDF gerados para este cliente. Pela declaração de faturamento, o sistema consulta o CNPJ
-        e completa automaticamente os dados cadastrais e CNAEs, além de preencher as demais informações do estudo.
+        e completa automaticamente os dados cadastrais e CNAEs. O Resumo Mensal preenche a folha e a Memória de
+        Cálculo atualiza os quatro regimes tributários.
       </p>
 
       <div
