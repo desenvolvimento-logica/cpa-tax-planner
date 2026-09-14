@@ -1,4 +1,4 @@
-import { brl, brlExato, MESES, soma, type TributacaoNacional } from "@/lib/estudo";
+import { brl, MESES, soma, type TributacaoNacional } from "@/lib/estudo";
 import { CampoValor, Painel } from "./campos";
 
 export function SecaoFaturamento({
@@ -55,14 +55,12 @@ export function SecaoFaturamento({
         </div>
         {tributacoes.length ? (
           <div className="mt-3 overflow-x-auto">
-            <table className="w-full min-w-[680px] text-sm">
+            <table className="w-full min-w-[520px] text-sm">
               <thead>
                 <tr className="border-b border-line text-[11px] uppercase tracking-widest text-muted-foreground">
                   <th className="py-2 text-left font-medium">Código</th>
                   <th className="py-2 text-left font-medium">Descrição</th>
-                  <th className="py-2 text-right font-medium">Notas emitidas</th>
                   <th className="py-2 text-right font-medium">ISS (%)</th>
-                  <th className="py-2 text-right font-medium">ISS estimado</th>
                 </tr>
               </thead>
               <tbody>
@@ -70,7 +68,6 @@ export function SecaoFaturamento({
                   <tr key={item.id} className="border-b border-line/70">
                     <td className="py-2 pr-3 font-medium">{item.codigo}</td>
                     <td className="py-2 pr-3 text-ink/70">{item.descricao || "—"}</td>
-                    <td className="py-2 pr-3 text-right tabular-nums">{brlExato(item.valorNotas)}</td>
                     <td className="w-28 py-1">
                       <CampoValor
                         valor={item.aliquotaIss}
@@ -80,9 +77,6 @@ export function SecaoFaturamento({
                         className="w-24"
                         placeholder="0,00"
                       />
-                    </td>
-                    <td className="py-2 text-right tabular-nums">
-                      {brlExato(item.valorNotas * item.aliquotaIss / 100)}
                     </td>
                   </tr>
                 ))}
