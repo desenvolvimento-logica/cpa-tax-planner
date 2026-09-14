@@ -54,27 +54,27 @@ export function SecaoFaturamento({
           <span className="text-[11px] text-muted-foreground">ISS preenchido manualmente por código</span>
         </div>
         {tributacoes.length ? (
-          <div className="mt-3 overflow-x-auto">
-            <table className="w-full min-w-[520px] text-sm">
+          <div className="mt-3">
+            <table className="w-full table-fixed text-sm">
               <thead>
                 <tr className="border-b border-line text-[11px] uppercase tracking-widest text-muted-foreground">
-                  <th className="py-2 text-left font-medium">Código</th>
+                  <th className="w-16 py-2 text-left font-medium sm:w-24">Código</th>
                   <th className="py-2 text-left font-medium">Descrição</th>
-                  <th className="py-2 text-right font-medium">ISS (%)</th>
+                  <th className="w-20 py-2 text-right font-medium sm:w-28">ISS (%)</th>
                 </tr>
               </thead>
               <tbody>
                 {tributacoes.map((item) => (
                   <tr key={item.id} className="border-b border-line/70">
-                    <td className="py-2 pr-3 font-medium">{item.codigo}</td>
-                    <td className="py-2 pr-3 text-ink/70">{item.descricao || "—"}</td>
-                    <td className="w-28 py-1">
+                    <td className="py-2 pr-2 font-medium">{item.codigo}</td>
+                    <td className="break-words py-2 pr-2 text-ink/70">{item.descricao || "—"}</td>
+                    <td className="w-20 py-1 sm:w-28">
                       <CampoValor
                         valor={item.aliquotaIss}
                         onChange={(aliquotaIss) =>
                           onChangeTributacoes(tributacoes.map((atual) => atual.id === item.id ? { ...atual, aliquotaIss } : atual))
                         }
-                        className="w-24"
+                        className="w-full"
                         placeholder="0,00"
                       />
                     </td>
