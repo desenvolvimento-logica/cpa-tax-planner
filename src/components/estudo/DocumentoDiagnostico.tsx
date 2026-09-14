@@ -311,9 +311,7 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
                 <tr className="bg-frost text-center">
                   <th className="border border-line px-2 py-1.5">Código</th>
                   <th className="border border-line px-2 py-1.5">Descrição</th>
-                  <th className="border border-line px-2 py-1.5">Notas emitidas</th>
-                  <th className="border border-line px-2 py-1.5">ISS</th>
-                  <th className="border border-line px-2 py-1.5">ISS estimado</th>
+                   <th className="border border-line px-2 py-1.5">ISS (%)</th>
                 </tr>
               </thead>
               <tbody className="text-center">
@@ -321,9 +319,7 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
                   <tr key={item.id}>
                     <td className="border border-line px-2 py-1.5 font-medium">{item.codigo}</td>
                     <td className="border border-line px-2 py-1.5">{item.descricao || "—"}</td>
-                    <td className="border border-line px-2 py-1.5">{brlExato(item.valorNotas)}</td>
                     <td className="border border-line px-2 py-1.5">{item.aliquotaIss.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}%</td>
-                    <td className="border border-line px-2 py-1.5">{brlExato(item.valorNotas * item.aliquotaIss / 100)}</td>
                   </tr>
                 ))}
               </tbody>

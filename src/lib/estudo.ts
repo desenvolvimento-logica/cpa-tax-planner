@@ -56,7 +56,6 @@ export type TributacaoNacional = {
   id: string;
   codigo: string;
   descricao: string;
-  valorNotas: number;
   aliquotaIss: number;
 };
 

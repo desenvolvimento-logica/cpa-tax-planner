@@ -109,11 +109,6 @@ function extrairTributacoesNacionais(linhas: Linha[]): TributacaoNacional[] {
     );
     if (iCodigo < 0) continue;
     const iDescricao = cols.findIndex((c) => c === "descricao do servico" || c.startsWith("descricao do servico"));
-    const iValor = cols.findIndex((c) =>
-      c.includes("valor contab") ||
-      (c.includes("valor") && (c.includes("nota") || c.includes("servico"))) ||
-      c === "valor",
-    );
     const iAliquota = cols.findIndex((c) => c.includes("iss") && (c.includes("aliq") || c.includes("percent")));
     const mapa = new Map<string, TributacaoNacional>();
     for (const linha of linhas.slice(i + 1)) {
@@ -124,21 +119,17 @@ function extrairTributacoesNacionais(linhas: Linha[]): TributacaoNacional[] {
       const descricaoOficial = partesCodigo?.[2]?.trim() || "";
       const descricaoDaNota = iDescricao >= 0 ? String(linha[iDescricao] ?? "").trim() : "";
       const descricao = descricaoOficial || descricaoDaNota;
-      const valorNotas = iValor >= 0 ? paraNumero(linha[iValor]) : 0;
       let aliquotaIss = iAliquota >= 0 ? paraNumero(linha[iAliquota]) : 0;
       if (aliquotaIss > 0 && aliquotaIss <= 1) aliquotaIss *= 100;
       const atual = mapa.get(codigo);
       if (atual) {
-        atual.valorNotas += valorNotas;
         if (!atual.descricao && descricao) atual.descricao = descricao;
         if (!atual.aliquotaIss && aliquotaIss) atual.aliquotaIss = aliquotaIss;
       } else {
-        mapa.set(codigo, { id: novoId(), codigo, descricao, valorNotas, aliquotaIss });
+        mapa.set(codigo, { id: novoId(), codigo, descricao, aliquotaIss });
       }
     }
-    return [...mapa.values()]
-      .map((item) => ({ ...item, valorNotas: Math.round(item.valorNotas * 100) / 100 }))
-      .sort((a, b) => b.valorNotas - a.valorNotas || a.codigo.localeCompare(b.codigo, "pt-BR"));
+    return [...mapa.values()].sort((a, b) => a.codigo.localeCompare(b.codigo, "pt-BR"));
   }
   return [];
 }
@@ -165,8 +156,9 @@ export async function parsePlanilhaRegimes(
       const existentes = new Map(tributacoesNacionais.map((item) => [item.codigo, item]));
       for (const item of codigos) {
         const atual = existentes.get(item.codigo);
-        if (atual) atual.valorNotas += item.valorNotas;
-        else {
+        if (atual) {
+          if (!atual.descricao && item.descricao) atual.descricao = item.descricao;
+        } else {
           tributacoesNacionais.push(item);
           existentes.set(item.codigo, item);
         }

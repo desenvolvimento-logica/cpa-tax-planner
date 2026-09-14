@@ -7,3 +7,4 @@
 - [x] Validar totais, desktop, celular e persistência após recarregar.
 - [x] Ler o Código de Tributação Nacional das planilhas de notas emitidas.
 - [x] Permitir alíquota de ISS manual por código e apresentar o resumo no estudo e diagnóstico.
+- [x] Simplificar a relação para código, descrição e ISS manual, sem valores ou cálculos das notas.
