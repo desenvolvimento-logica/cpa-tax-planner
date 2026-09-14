@@ -537,12 +537,16 @@ export async function importarArquivos(
       try {
         const { parsePlanilhaRegimes } = await import("./importarExcel");
         const { clientes, fornecedores, faturamento, tributacoesNacionais } = await parsePlanilhaRegimes(arquivo);
+        const tributacoesMescladas = tributacoesNacionais.map((item) => {
+          const existente = estudo.tributacoesNacionais.find((atual) => atual.codigo === item.codigo);
+          return existente?.aliquotaIss ? { ...item, aliquotaIss: existente.aliquotaIss } : item;
+        });
         estudo = {
           ...estudo,
           clientes: clientes.length ? clientes : estudo.clientes,
           fornecedores: fornecedores.length ? fornecedores : estudo.fornecedores,
           faturamento: faturamento ?? estudo.faturamento,
-          tributacoesNacionais: tributacoesNacionais.length ? tributacoesNacionais : estudo.tributacoesNacionais,
+          tributacoesNacionais: tributacoesMescladas.length ? tributacoesMescladas : estudo.tributacoesNacionais,
         };
         resultados.push({
           nome: arquivo.name,

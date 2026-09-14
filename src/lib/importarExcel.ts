@@ -105,13 +105,14 @@ function extrairTributacoesNacionais(linhas: Linha[]): TributacaoNacional[] {
   for (let i = 0; i < Math.min(linhas.length, 30); i++) {
     const cols = (linhas[i] ?? []).map((c) => semAcento(String(c ?? "")));
     const iCodigo = cols.findIndex((c) =>
-      (c.includes("tributacao") && (c.includes("nacional") || c.includes("cod"))) ||
-      c === "ctribnac" || c === "codigo tributacao nacional",
+      (c.includes("trib") && c.includes("nacional")) || c === "ctribnac" || c === "codigo tributacao nacional",
     );
     if (iCodigo < 0) continue;
     const iDescricao = cols.findIndex((c) => c.includes("descricao") || c.includes("servico"));
     const iValor = cols.findIndex((c) =>
-      c.includes("valor contab") || c.includes("valor nota") || c.includes("valor servico") || c === "valor",
+      c.includes("valor contab") ||
+      (c.includes("valor") && (c.includes("nota") || c.includes("servico"))) ||
+      c === "valor",
     );
     const iAliquota = cols.findIndex((c) => c.includes("iss") && (c.includes("aliq") || c.includes("percent")));
     const mapa = new Map<string, TributacaoNacional>();
