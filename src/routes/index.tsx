@@ -189,7 +189,12 @@ function Index() {
             <SecaoCnaes cnaes={estudo.cnaes} onChange={(cnaes) => atualizar({ cnaes })} />
           </div>
           <div id="faturamento" className="min-w-0 scroll-mt-6">
-            <SecaoFaturamento valores={estudo.faturamento} onChange={(faturamento) => atualizar({ faturamento })} />
+            <SecaoFaturamento
+              valores={estudo.faturamento}
+              tributacoes={estudo.tributacoesNacionais}
+              onChange={(faturamento) => atualizar({ faturamento })}
+              onChangeTributacoes={(tributacoesNacionais) => atualizar({ tributacoesNacionais })}
+            />
           </div>
           <div id="folha" className="min-w-0 scroll-mt-6">
             <SecaoFolha valores={estudo.folha} onChange={(folha) => atualizar({ folha })} />

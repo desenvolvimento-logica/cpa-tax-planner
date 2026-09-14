@@ -52,6 +52,14 @@ export type CnaeItem = {
   anexo: string;
 };
 
+export type TributacaoNacional = {
+  id: string;
+  codigo: string;
+  descricao: string;
+  valorNotas: number;
+  aliquotaIss: number;
+};
+
 export type Parceiro = {
   id: string;
   nome: string;
@@ -136,6 +144,7 @@ export type Estudo = {
   cadastro: Cadastro;
   cnaes: CnaeItem[];
   faturamento: number[];
+  tributacoesNacionais: TributacaoNacional[];
   folha: number[];
   fornecedores: Parceiro[];
   clientes: Parceiro[];
@@ -199,6 +208,7 @@ export const estudoVazio: Estudo = {
   },
   cnaes: [],
   faturamento: zeros(),
+  tributacoesNacionais: [],
   folha: zeros(),
   fornecedores: [],
   clientes: [],
@@ -263,6 +273,7 @@ export const estudoExemplo: Estudo = {
   ],
   // Faturamento declarado de 01/01/2026 a 31/07/2026 — total R$ 1.358.994,30
   faturamento: [217281.3, 187029.3, 170205.5, 191820.8, 188320.8, 198975.5, 205361.1, 0, 0, 0, 0, 0],
+  tributacoesNacionais: [],
   folha: [69425.6, 66100, 68473.45, 65279, 63928.81, 73147.38, 0, 0, 0, 0, 0, 0],
   fornecedores: [
     { id: "f1", nome: "UNIMED CAMPINAS COOPERATIVA DE TRABALHO MEDICO", cnpj: "46.124.624/0001-11", regime: "Normal", valor: 61211.79 },

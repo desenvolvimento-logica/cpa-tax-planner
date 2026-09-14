@@ -18,6 +18,7 @@ const normalizarEstudo = (salvo: Estudo): Estudo => ({
   ...estudoExemplo,
   ...salvo,
   folha: salvo.folha ?? estudoExemplo.folha,
+  tributacoesNacionais: salvo.tributacoesNacionais ?? [],
   diagnostico: { ...diagnosticoPadrao, ...(salvo.diagnostico ?? {}) },
 });
 
