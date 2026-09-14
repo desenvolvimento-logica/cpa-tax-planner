@@ -5,7 +5,9 @@ import { consultarCnpjPublico } from "./cnpj.functions";
 export type TipoRelatorio =
   | "cnpj"
   | "faturamento"
+  | "folha"
   | "regimes"
+  | "memoria-calculo"
   | "simulacao-reforma"
   | "planejamento"
   | "cnae"
@@ -14,7 +16,9 @@ export type TipoRelatorio =
 export const ROTULO_TIPO: Record<TipoRelatorio, string> = {
   cnpj: "Consulta CNPJ (dados cadastrais)",
   faturamento: "Declaração de faturamento",
+  folha: "Resumo Mensal da folha",
   regimes: "Perfil tributário de clientes e fornecedores",
+  "memoria-calculo": "Comparativo de regimes tributários — Memória de Cálculo",
   "simulacao-reforma": "Simulação da Reforma Tributária (Simples atual e híbrido)",
   planejamento: "Planejamento tributário (Lucro Presumido e Lucro Real)",
   cnae: "Consulta de CNAE",
@@ -124,6 +128,8 @@ export function detectarTipo(texto: string, nome: string): TipoRelatorio {
   const n = nome.toLowerCase();
   if (t.includes("cadastro nacional da pessoa jurídica") || t.includes("comprovante de inscrição")) return "cnpj";
   if (t.includes("declaração de faturamento")) return "faturamento";
+  if (t.includes("resumo da folha") && t.includes("base total")) return "folha";
+  if (t.includes("comparativo de regimes tributários") && t.includes("memória de cálculo")) return "memoria-calculo";
   if (t.includes("perfil tributário clientes e fornecedores")) return "regimes";
   if (t.includes("simulação reforma tributária")) return "simulacao-reforma";
   if (t.includes("planejamento tributário")) return "planejamento";
@@ -216,6 +222,94 @@ export function parseFaturamento(texto: string): { faturamento: number[]; regime
   const regimeAtual = texto.match(/REGIME\s*:?\s*([^\n]+)/i)?.[1]?.trim() ?? "";
   const cnpj = texto.match(/\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}/)?.[0] ?? "";
   return { faturamento, regimeAtual, cnpj };
+}
+
+/** Resumo Mensal: Base total da seção INSS, competência a competência. */
+export function parseFolha(texto: string): number[] {
+  const folha = zeros();
+  const blocos = texto.split(/(?=Compet[eê]ncia\s*:)/i);
+  for (const bloco of blocos) {
+    const competencia = bloco.match(/Compet[eê]ncia\s*:\s*(\d{2})\/\d{4}/i);
+    if (!competencia) continue;
+    const mes = Number(competencia[1]) - 1;
+    if (mes < 0 || mes > 11 || folha[mes] !== 0) continue;
+    const secaoInss = bloco.match(/\bINSS\b[\s\S]*?Base total\s*:\s*(\d{1,3}(?:\.\d{3})*,\d{2})/i);
+    if (secaoInss) folha[mes] = num(secaoInss[1] ?? "");
+  }
+  return folha;
+}
+
+const RX_MOEDA = /R\$\s*-?\d{1,3}(?:\.\d{3})*,\d{2}/g;
+
+function somarTributos(linhas: Array<{ nome: string; valores: number[] }>) {
+  const mapa = new Map<string, number>();
+  for (const linha of linhas) {
+    const valor = linha.valores.reduce((a, b) => a + b, 0);
+    if (valor !== 0) mapa.set(linha.nome, (mapa.get(linha.nome) ?? 0) + valor);
+  }
+  return [...mapa].map(([nome, valor]) => ({ nome, valor }));
+}
+
+function linhasMensais(secao: string): number[][] {
+  const blocos = secao.split(/(?=\b\d{2}\/\d{4}\b)/);
+  return blocos
+    .filter((bloco) => /^\d{2}\/\d{4}/.test(bloco.trim()))
+    .map((bloco) => (bloco.match(RX_MOEDA) ?? []).map(num));
+}
+
+/** Memória de Cálculo: comparativo mensal completo dos quatro regimes. */
+export function parseMemoriaCalculo(texto: string): Simulacoes {
+  const separar = (inicio: RegExp, fim?: RegExp) => {
+    const i = texto.search(inicio);
+    if (i < 0) return "";
+    const restante = texto.slice(i);
+    const j = fim ? restante.slice(1).search(fim) : -1;
+    return j >= 0 ? restante.slice(0, j + 1) : restante;
+  };
+  const atuais = linhasMensais(separar(/1\.\s*Simples Nacional Atual/i, /2\.\s*Simples Nacional H[ií]brido/i));
+  const hibridos = linhasMensais(separar(/2\.\s*Simples Nacional H[ií]brido/i, /3\.\s*Lucro Presumido/i));
+  const presumidos = linhasMensais(separar(/3\.\s*Lucro Presumido/i, /4\.\s*Lucro Real/i));
+  const reais = linhasMensais(separar(/4\.\s*Lucro Real/i));
+  const mensal = (linhas: number[][], indice: (valores: number[]) => number) => {
+    const valores = zeros();
+    linhas.slice(0, 12).forEach((linha, i) => { valores[i] = indice(linha); });
+    return valores;
+  };
+  const atualTributos = somarTributos([
+    { nome: "IRPJ", valores: atuais.map((v) => v[1] ?? 0) },
+    { nome: "CSLL", valores: atuais.map((v) => v[2] ?? 0) },
+    { nome: "COFINS", valores: atuais.map((v) => v[3] ?? 0) },
+    { nome: "PIS", valores: atuais.map((v) => v[4] ?? 0) },
+    { nome: "INSS/CPP", valores: atuais.map((v) => v[5] ?? 0) },
+    { nome: "ISS", valores: atuais.map((v) => v[6] ?? 0) },
+  ]);
+  const hibridoTributos = somarTributos([
+    { nome: "IRPJ", valores: hibridos.map((v) => v[2] ?? 0) },
+    { nome: "CSLL", valores: hibridos.map((v) => v[3] ?? 0) },
+    { nome: "INSS/CPP", valores: hibridos.map((v) => v[4] ?? 0) },
+    { nome: "ISS", valores: hibridos.map((v) => v[5] ?? 0) },
+    { nome: "CBS líquida", valores: hibridos.map((v) => v[9] ?? 0) },
+  ]);
+  const tributosRegular = (linhas: number[][], real: boolean) => somarTributos([
+    { nome: "ISS", valores: linhas.map((v) => v[2] ?? 0) },
+    { nome: "INSS/CPP", valores: linhas.map((v) => v[3] ?? 0) },
+    { nome: "CBS líquida", valores: linhas.map((v) => v[6] ?? 0) },
+    { nome: "IRPJ", valores: linhas.map((v) => real ? (v.length >= 12 ? v[8] ?? 0 : 0) : (v.length >= 11 ? v[7] ?? 0 : 0)) },
+    { nome: "Adicional IRPJ", valores: linhas.map((v) => real ? (v.length >= 12 ? v[9] ?? 0 : 0) : (v.length >= 11 ? v[8] ?? 0 : 0)) },
+    { nome: "CSLL", valores: linhas.map((v) => real ? (v.length >= 12 ? v[10] ?? 0 : 0) : (v.length >= 11 ? v[9] ?? 0 : 0)) },
+  ]);
+  return {
+    simplesAtual: mensal(atuais, (v) => v[7] ?? 0),
+    simplesHibrido: mensal(hibridos, (v) => v.at(-1) ?? 0),
+    lucroPresumido: mensal(presumidos, (v) => v.at(-1) ?? 0),
+    lucroReal: mensal(reais, (v) => v.at(-1) ?? 0),
+    tributos: {
+      simplesAtual: atualTributos,
+      simplesHibrido: hibridoTributos,
+      lucroPresumido: tributosRegular(presumidos, false),
+      lucroReal: tributosRegular(reais, true),
+    },
+  };
 }
 
 export function parseRegimes(texto: string): { clientes: Parceiro[]; fornecedores: Parceiro[] } {
@@ -531,6 +625,22 @@ export async function importarArquivos(
           resumo: `${clientes.length} cliente(s) · ${fornecedores.length} fornecedor(es)`,
           ok: clientes.length + fornecedores.length > 0,
         });
+      } else if (tipo === "folha") {
+        const folha = parseFolha(texto);
+        const meses = folha.filter((v) => v > 0).length;
+        const total = folha.reduce((a, b) => a + b, 0);
+        estudo = { ...estudo, folha };
+        resultados.push({
+          nome: arquivo.name,
+          tipo,
+          resumo: `${meses} mês(es) · total ${total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}`,
+          ok: meses > 0,
+        });
+      } else if (tipo === "memoria-calculo") {
+        const simulacoes = parseMemoriaCalculo(texto);
+        const meses = simulacoes.simplesAtual.filter((v) => v > 0).length;
+        estudo = { ...estudo, simulacoes };
+        resultados.push({ nome: arquivo.name, tipo, resumo: `${meses} mês(es) · 4 regimes preenchidos`, ok: meses > 0 });
       } else if (tipo === "simulacao-reforma") {
         const parcial = parseSimulacaoReforma(texto);
         estudo = {
