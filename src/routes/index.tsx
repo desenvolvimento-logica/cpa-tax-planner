@@ -21,7 +21,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Sistema de apresentação contábil: consulta cadastral, CNAEs e anexos, faturamento, CBS por regime de fornecedores e clientes e simulações tributárias para 2027.",
+          "Sistema contábil com cadastro, CNAEs, faturamento, folha, CBS por regime e comparação tributária para 2027.",
       },
       { property: "og:title", content: "Estudo do Simples Nacional Híbrido — Reforma Tributária 2027" },
       {

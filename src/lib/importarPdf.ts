@@ -283,12 +283,11 @@ export function parseMemoriaCalculo(texto: string): Simulacoes {
     { nome: "INSS/CPP", valores: atuais.map((v) => v[5] ?? 0) },
     { nome: "ISS", valores: atuais.map((v) => v[6] ?? 0) },
   ]);
+  const hibridoDas = hibridos.map((v) => v.at(-3) ?? 0);
+  const hibridoTotal = hibridos.map((v) => v.at(-1) ?? 0);
   const hibridoTributos = somarTributos([
-    { nome: "IRPJ", valores: hibridos.map((v) => v[2] ?? 0) },
-    { nome: "CSLL", valores: hibridos.map((v) => v[3] ?? 0) },
-    { nome: "INSS/CPP", valores: hibridos.map((v) => v[4] ?? 0) },
-    { nome: "ISS", valores: hibridos.map((v) => v[5] ?? 0) },
-    { nome: "CBS líquida", valores: hibridos.map((v) => v[9] ?? 0) },
+    { nome: "DAS Híbrido", valores: hibridoDas },
+    { nome: "CBS líquida", valores: hibridoTotal.map((total, i) => total - (hibridoDas[i] ?? 0)) },
   ]);
   const tributosRegular = (linhas: number[][], real: boolean) => somarTributos([
     { nome: "ISS", valores: linhas.map((v) => v[2] ?? 0) },
