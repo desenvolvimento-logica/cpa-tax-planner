@@ -182,8 +182,8 @@ function EstudoApp() {
               </div>
               <button
                 type="button"
-                onClick={() => {
-                  if (estudo.cadastro.cnpj) salvarEstudo();
+                onClick={async () => {
+                  if (estudo.cadastro.cnpj) await salvarEstudo();
                   setEstudo({ ...estudoVazio, escritorio: estudo.escritorio });
                   setEtapa("importacao");
                 }}
