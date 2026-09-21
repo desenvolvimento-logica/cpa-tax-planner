@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/app-client";
 import { SecaoImportacao } from "@/components/estudo/SecaoImportacao";
 import { SecaoCadastro, SecaoCnaes } from "@/components/estudo/SecaoCadastro";
 import { SecaoFaturamento } from "@/components/estudo/SecaoFaturamento";
