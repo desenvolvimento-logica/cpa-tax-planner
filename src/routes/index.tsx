@@ -48,7 +48,65 @@ const ETAPAS = [
   { id: "diagnostico", numero: "07", nome: "Diagnóstico" },
 ];
 
+const HUB_URL = "https://hub-logica.vercel.app";
+
 function Index() {
+  const [estado, setEstado] = useState<"carregando" | "autorizado" | "negado">("carregando");
+
+  useEffect(() => {
+    let ativo = true;
+
+    const { data: sub } = supabase.auth.onAuthStateChange((_evento, sessao) => {
+      if (ativo && sessao) setEstado("autorizado");
+    });
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (ativo && data.session) setEstado("autorizado");
+    });
+
+    const timer = window.setTimeout(() => {
+      if (ativo) setEstado((atual) => (atual === "autorizado" ? atual : "negado"));
+    }, 2500);
+
+    return () => {
+      ativo = false;
+      window.clearTimeout(timer);
+      sub.subscription.unsubscribe();
+    };
+  }, []);
+
+  if (estado === "carregando") {
+    return (
+      <div className="flex min-h-screen w-full items-center justify-center bg-mist font-body text-ink">
+        <div className="text-center">
+          <div className="mx-auto size-8 animate-spin rounded-full border-2 border-line border-t-brand" />
+          <p className="mt-4 text-sm text-ink/60">Conectando ao portal Luz.IA…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (estado === "negado") {
+    return (
+      <div className="flex min-h-screen w-full items-center justify-center bg-mist px-6 font-body text-ink">
+        <div className="max-w-md rounded-2xl bg-white/80 p-8 text-center ring-1 ring-line">
+          <h1 className="font-display text-xl font-semibold">Acesso não autorizado</h1>
+          <p className="mt-3 text-sm text-ink/70">Abra esta ferramenta pelo portal Luz.IA.</p>
+          <a
+            href={HUB_URL}
+            className="mt-6 inline-block rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+          >
+            Ir para o portal Luz.IA
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  return <EstudoApp />;
+}
+
+function EstudoApp() {
   const { estudo, setEstudo, atualizar, historico, salvarEstudo, abrirEstudo, excluirEstudo } = useEstudo();
   const [etapa, setEtapa] = useState("importacao");
   const [documentoAberto, setDocumentoAberto] = useState(false);
