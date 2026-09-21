@@ -2,6 +2,9 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Estudo } from "./estudo";
 
+// tp_estudos vive no banco compartilhado do Hub, fora dos tipos gerados localmente.
+const tabela = (supabase: unknown) => (supabase as any).from("tp_estudos");
+
 export type ResumoEstudo = {
   id: string;
   cnpj: string;
@@ -12,8 +15,7 @@ export type ResumoEstudo = {
 export const listarEstudos = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await context.supabase
-      .from("tp_estudos")
+    const { data, error } = await tabela(context.supabase)
       .select("id, cnpj, nome_cliente, atualizado_em")
       .order("atualizado_em", { ascending: false });
     if (error) throw new Error(error.message);
@@ -29,8 +31,7 @@ export const obterEstudo = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { id: string }) => d)
   .handler(async ({ data, context }) => {
-    const { data: row, error } = await context.supabase
-      .from("tp_estudos")
+    const { data: row, error } = await tabela(context.supabase)
       .select("dados")
       .eq("id", data.id)
       .maybeSingle();
@@ -47,8 +48,7 @@ export const salvarEstudo = createServerFn({ method: "POST" })
     const nomeCliente =
       data.estudo.cadastro.nomeFantasia || data.estudo.cadastro.razaoSocial || "Estudo sem nome";
 
-    const { data: existente } = await context.supabase
-      .from("tp_estudos")
+    const { data: existente } = await tabela(context.supabase)
       .select("id")
       .eq("cnpj", cnpj)
       .maybeSingle();
@@ -62,8 +62,7 @@ export const salvarEstudo = createServerFn({ method: "POST" })
       ...(existente ? {} : { criado_por: context.userId }),
     };
 
-    const { data: salvo, error } = await context.supabase
-      .from("tp_estudos")
+    const { data: salvo, error } = await tabela(context.supabase)
       .upsert(registro as any, { onConflict: "cnpj" })
       .select("id")
       .single();
@@ -75,7 +74,7 @@ export const excluirEstudo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { id: string }) => d)
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.from("tp_estudos").delete().eq("id", data.id);
+    const { error } = await tabela(context.supabase).delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
