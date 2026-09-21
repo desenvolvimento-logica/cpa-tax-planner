@@ -27,11 +27,17 @@ export function initializeHubSessionListener() {
         if (error) return;
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
-        await supabase.from("tp_profiles").upsert({
-          id: user.id,
-          nome: user.user_metadata?.full_name ?? user.user_metadata?.name ?? user.email?.split("@")[0] ?? "",
-          email: user.email ?? "",
-        });
+        const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
+        const nome =
+          (typeof meta['full_name'] === "string" ? meta['full_name'] : undefined) ??
+          (typeof meta['name'] === "string" ? meta['name'] : undefined) ??
+          user.email?.split("@")[0] ??
+          "";
+        // A tabela tp_profiles vive no banco do Hub, fora dos tipos gerados localmente.
+        const db = supabase as unknown as {
+          from: (table: string) => { upsert: (values: Record<string, unknown>) => Promise<unknown> };
+        };
+        await db.from("tp_profiles").upsert({ id: user.id, nome, email: user.email ?? "" });
       })
       .catch((error) => console.error("[LUZIA_SESSION]", error));
   });
