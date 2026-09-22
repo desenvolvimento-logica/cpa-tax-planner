@@ -204,16 +204,20 @@ export function parseCnpj(texto: string): { cadastro: Partial<Cadastro>; cnaes: 
   };
 }
 
+const semAcentos = (s: string) =>
+  s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
+/** Declaração de Faturamento: uma linha por mês (M Ê S / ANO / Total R$). */
 export function parseFaturamento(texto: string): { faturamento: number[]; regimeAtual: string; cnpj: string } {
   const faturamento = zeros();
   for (const linha of texto.split("\n")) {
-    const semAcento = linha
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
-    const idx = MESES_NOME.findIndex((mes) =>
-      semAcento.trimStart().startsWith(mes.normalize("NFD").replace(/[\u0300-\u036f]/g, "")),
-    );
+    const plana = semAcentos(linha);
+    // ignora cabeçalhos, período e a linha de totais
+    if (/\btotais?\b|\bperiodo\b|\bm\s*e\s*s\b/.test(plana)) continue;
+    const idx = MESES_NOME.findIndex((mes) => new RegExp(`\\b${semAcentos(mes)}\\b`).test(plana));
     if (idx < 0) continue;
     const valores = linha.match(RX_VALOR);
     if (!valores?.length) continue;
@@ -536,22 +540,22 @@ export async function importarArquivos(
     if (/\.(xlsx|xlsm|xls|csv)$/i.test(arquivo.name)) {
       try {
         const { parsePlanilhaRegimes } = await import("./importarExcel");
-        const { clientes, fornecedores, faturamento, tributacoesNacionais } = await parsePlanilhaRegimes(arquivo);
+        const { clientes, fornecedores, tributacoesNacionais } = await parsePlanilhaRegimes(arquivo);
         const tributacoesMescladas = tributacoesNacionais.map((item) => {
           const existente = estudo.tributacoesNacionais.find((atual) => atual.codigo === item.codigo);
           return existente?.aliquotaIss ? { ...item, aliquotaIss: existente.aliquotaIss } : item;
         });
+        // O faturamento mensal vem exclusivamente da Declaração de Faturamento (PDF).
         estudo = {
           ...estudo,
           clientes: clientes.length ? clientes : estudo.clientes,
           fornecedores: fornecedores.length ? fornecedores : estudo.fornecedores,
-          faturamento: faturamento ?? estudo.faturamento,
           tributacoesNacionais: tributacoesMescladas.length ? tributacoesMescladas : estudo.tributacoesNacionais,
         };
         resultados.push({
           nome: arquivo.name,
           tipo: "regimes",
-          resumo: `${clientes.length} cliente(s) · ${fornecedores.length} fornecedor(es)${faturamento ? " · faturamento" : ""}${tributacoesNacionais.length ? ` · ${tributacoesNacionais.length} código(s) tributário(s)` : ""}`,
+          resumo: `${clientes.length} cliente(s) · ${fornecedores.length} fornecedor(es)${tributacoesNacionais.length ? ` · ${tributacoesNacionais.length} código(s) tributário(s)` : ""}`,
           ok: clientes.length + fornecedores.length + tributacoesNacionais.length > 0,
         });
       } catch {
