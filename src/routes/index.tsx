@@ -130,7 +130,7 @@ function EstudoApp() {
 
   if (documentoAberto) {
     return (
-      <div className="min-h-screen w-full bg-mist py-8">
+      <div className="min-h-screen w-full bg-mist py-8 print:bg-white print:py-0">
         <div className="no-print sticky top-0 z-10 mx-auto mb-6 flex max-w-[210mm] items-center justify-between gap-3 rounded-full bg-white/90 px-5 py-3 shadow-sm ring-1 ring-line backdrop-blur">
           <p className="font-display text-sm font-semibold">Diagnóstico — pré-visualização</p>
           <div className="flex gap-2">
