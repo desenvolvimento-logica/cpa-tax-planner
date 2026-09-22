@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { supabase } from "@/integrations/supabase/app-client";
 import { estudoVazio, type Estudo } from "./estudo";
 import {
   listarEstudos,
@@ -16,6 +17,16 @@ export type EstudoSalvo = {
   atualizadoEm: string;
 };
 
+// Sem sessão do portal Luz.IA o banco compartilhado não aceita leitura/gravação.
+async function temSessao(): Promise<boolean> {
+  try {
+    const { data } = await supabase.auth.getSession();
+    return Boolean(data.session);
+  } catch {
+    return false;
+  }
+}
+
 export function useEstudo() {
   const [estudo, setEstudo] = useState<Estudo>(estudoVazio);
   const [estudoId, setEstudoId] = useState<string | null>(null);
@@ -28,6 +39,7 @@ export function useEstudo() {
   const excluirFn = useServerFn(excluirEstudoFn);
 
   const carregarHistorico = useCallback(async () => {
+    if (!(await temSessao())) return;
     try {
       const resumos = await listarFn();
       setHistorico(
@@ -50,6 +62,7 @@ export function useEstudo() {
   const salvarEstudo = useCallback(
     async (valor: Estudo = estudo) => {
       if (!valor.cadastro.cnpj?.trim()) return;
+      if (!(await temSessao())) return;
       try {
         const { id } = await salvarFn({ data: { estudo: valor } });
         setEstudoId(id);
@@ -75,6 +88,7 @@ export function useEstudo() {
 
   const abrirEstudo = useCallback(
     async (id: string) => {
+      if (!(await temSessao())) return;
       try {
         const dados = await obterFn({ data: { id } });
         if (dados) {
@@ -90,6 +104,7 @@ export function useEstudo() {
 
   const excluirEstudo = useCallback(
     async (id: string) => {
+      if (!(await temSessao())) return;
       try {
         await excluirFn({ data: { id } });
         if (id === estudoId) {
