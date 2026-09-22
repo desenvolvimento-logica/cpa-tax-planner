@@ -263,6 +263,9 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
             ))}
           </tbody>
         </table>
+
+        <Titulo>Atenção ao prazo</Titulo>
+        <Paragrafos texto={d.prazos} />
       </Pagina>
 
       {/* CNAEs */}
