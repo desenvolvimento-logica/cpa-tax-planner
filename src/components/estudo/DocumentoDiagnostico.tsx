@@ -217,7 +217,7 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
         <Paragrafos texto={d.oQueMuda} />
 
         <Titulo>Simples tradicional e Simples Híbrido lado a lado</Titulo>
-        <table className="mt-3 w-full border-collapse text-[9pt]">
+        <table className="mt-3 w-full border-collapse text-[8.5pt]">
           <thead>
             <tr className="bg-frost text-center">
               <th className="border border-line px-2 py-1.5 font-display font-semibold">Como fica</th>
