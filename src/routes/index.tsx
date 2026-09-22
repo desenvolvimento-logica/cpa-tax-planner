@@ -59,6 +59,7 @@ function Index() {
   );
 
   useEffect(() => {
+    if (!GATE_LUZIA_ATIVO) return;
     let ativo = true;
 
     const { data: sub } = supabase.auth.onAuthStateChange((_evento, sessao) => {
