@@ -204,16 +204,20 @@ export function parseCnpj(texto: string): { cadastro: Partial<Cadastro>; cnaes: 
   };
 }
 
+const semAcentos = (s: string) =>
+  s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
+/** Declaração de Faturamento: uma linha por mês (M Ê S / ANO / Total R$). */
 export function parseFaturamento(texto: string): { faturamento: number[]; regimeAtual: string; cnpj: string } {
   const faturamento = zeros();
   for (const linha of texto.split("\n")) {
-    const semAcento = linha
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
-    const idx = MESES_NOME.findIndex((mes) =>
-      semAcento.trimStart().startsWith(mes.normalize("NFD").replace(/[\u0300-\u036f]/g, "")),
-    );
+    const plana = semAcentos(linha);
+    // ignora cabeçalhos, período e a linha de totais
+    if (/\btotais?\b|\bperiodo\b|\bm\s*e\s*s\b/.test(plana)) continue;
+    const idx = MESES_NOME.findIndex((mes) => new RegExp(`\\b${semAcentos(mes)}\\b`).test(plana));
     if (idx < 0) continue;
     const valores = linha.match(RX_VALOR);
     if (!valores?.length) continue;
