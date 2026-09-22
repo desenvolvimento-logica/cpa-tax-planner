@@ -540,22 +540,22 @@ export async function importarArquivos(
     if (/\.(xlsx|xlsm|xls|csv)$/i.test(arquivo.name)) {
       try {
         const { parsePlanilhaRegimes } = await import("./importarExcel");
-        const { clientes, fornecedores, faturamento, tributacoesNacionais } = await parsePlanilhaRegimes(arquivo);
+        const { clientes, fornecedores, tributacoesNacionais } = await parsePlanilhaRegimes(arquivo);
         const tributacoesMescladas = tributacoesNacionais.map((item) => {
           const existente = estudo.tributacoesNacionais.find((atual) => atual.codigo === item.codigo);
           return existente?.aliquotaIss ? { ...item, aliquotaIss: existente.aliquotaIss } : item;
         });
+        // O faturamento mensal vem exclusivamente da Declaração de Faturamento (PDF).
         estudo = {
           ...estudo,
           clientes: clientes.length ? clientes : estudo.clientes,
           fornecedores: fornecedores.length ? fornecedores : estudo.fornecedores,
-          faturamento: faturamento ?? estudo.faturamento,
           tributacoesNacionais: tributacoesMescladas.length ? tributacoesMescladas : estudo.tributacoesNacionais,
         };
         resultados.push({
           nome: arquivo.name,
           tipo: "regimes",
-          resumo: `${clientes.length} cliente(s) · ${fornecedores.length} fornecedor(es)${faturamento ? " · faturamento" : ""}${tributacoesNacionais.length ? ` · ${tributacoesNacionais.length} código(s) tributário(s)` : ""}`,
+          resumo: `${clientes.length} cliente(s) · ${fornecedores.length} fornecedor(es)${tributacoesNacionais.length ? ` · ${tributacoesNacionais.length} código(s) tributário(s)` : ""}`,
           ok: clientes.length + fornecedores.length + tributacoesNacionais.length > 0,
         });
       } catch {
