@@ -166,7 +166,7 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
   })).filter((c) => c.total > 0);
 
   const temCnaes = estudo.cnaes.length > 0;
-  const total = temCnaes ? 6 : 5;
+  const total = temCnaes ? 7 : 6;
   let n = 1;
 
   return (
