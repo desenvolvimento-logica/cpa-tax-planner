@@ -39,6 +39,7 @@ export function useEstudo() {
   const excluirFn = useServerFn(excluirEstudoFn);
 
   const carregarHistorico = useCallback(async () => {
+    if (!(await temSessao())) return;
     try {
       const resumos = await listarFn();
       setHistorico(
@@ -61,6 +62,7 @@ export function useEstudo() {
   const salvarEstudo = useCallback(
     async (valor: Estudo = estudo) => {
       if (!valor.cadastro.cnpj?.trim()) return;
+      if (!(await temSessao())) return;
       try {
         const { id } = await salvarFn({ data: { estudo: valor } });
         setEstudoId(id);
@@ -86,6 +88,7 @@ export function useEstudo() {
 
   const abrirEstudo = useCallback(
     async (id: string) => {
+      if (!(await temSessao())) return;
       try {
         const dados = await obterFn({ data: { id } });
         if (dados) {
@@ -101,6 +104,7 @@ export function useEstudo() {
 
   const excluirEstudo = useCallback(
     async (id: string) => {
+      if (!(await temSessao())) return;
       try {
         await excluirFn({ data: { id } });
         if (id === estudoId) {
