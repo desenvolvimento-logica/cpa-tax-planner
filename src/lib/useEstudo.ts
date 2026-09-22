@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { supabase } from "@/integrations/supabase/app-client";
 import { estudoVazio, type Estudo } from "./estudo";
 import {
   listarEstudos,
