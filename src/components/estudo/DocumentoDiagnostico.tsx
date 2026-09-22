@@ -263,6 +263,9 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
             ))}
           </tbody>
         </table>
+
+        <Titulo>Atenção ao prazo</Titulo>
+        <Paragrafos texto={d.prazos} />
       </Pagina>
 
       {/* CNAEs */}
@@ -303,9 +306,6 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
       {/* Prazos + análise */}
       <Pagina rodape={rodape} numero={++n} total={total}>
         <Cabecalho />
-        <Titulo>Atenção ao prazo</Titulo>
-        <Paragrafos texto={d.prazos} />
-
         <Titulo>A análise que fizemos para você</Titulo>
         <p className="mt-3 w-full text-justify text-[10.5pt] leading-relaxed text-ink/85">
           Analisamos as vendas da sua empresa no ano-base de {d.anoBase}, somando {brlExato(faturamento)}. Veja como o
