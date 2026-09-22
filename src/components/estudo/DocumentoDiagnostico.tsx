@@ -215,9 +215,15 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
         <Paragrafos texto={d.introducao} />
         <Titulo>O que muda com a Reforma Tributária</Titulo>
         <Paragrafos texto={d.oQueMuda} />
+      </Pagina>
 
-        <Titulo>Simples tradicional e Simples Híbrido lado a lado</Titulo>
-        <table className="mt-3 w-full border-collapse text-[8.5pt]">
+      {/* Comparativo Simples tradicional x Híbrido */}
+      <Pagina rodape={rodape} numero={++n} total={total}>
+        <Cabecalho />
+        <h2 className="text-center font-display text-[14pt] font-semibold">
+          Simples tradicional e Simples Híbrido lado a lado
+        </h2>
+        <table className="mt-5 w-full border-collapse text-[9.5pt]">
           <thead>
             <tr className="bg-frost text-center">
               <th className="border border-line px-2 py-1.5 font-display font-semibold">Como fica</th>
