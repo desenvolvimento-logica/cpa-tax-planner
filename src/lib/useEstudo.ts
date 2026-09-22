@@ -17,6 +17,16 @@ export type EstudoSalvo = {
   atualizadoEm: string;
 };
 
+// Sem sessão do portal Luz.IA o banco compartilhado não aceita leitura/gravação.
+async function temSessao(): Promise<boolean> {
+  try {
+    const { data } = await supabase.auth.getSession();
+    return Boolean(data.session);
+  } catch {
+    return false;
+  }
+}
+
 export function useEstudo() {
   const [estudo, setEstudo] = useState<Estudo>(estudoVazio);
   const [estudoId, setEstudoId] = useState<string | null>(null);
