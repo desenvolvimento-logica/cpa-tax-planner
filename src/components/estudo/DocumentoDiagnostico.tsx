@@ -60,22 +60,31 @@ function Pagina({
 }) {
   return (
     <div className="pagina-doc relative mx-auto mb-6 flex h-[297mm] w-[210mm] flex-col overflow-hidden bg-white shadow-[0_18px_50px_-25px_rgba(0,0,0,0.4)] print:mb-0">
-      <div className={semPadding ? "flex flex-1 flex-col" : "flex flex-1 flex-col px-[18mm] pt-[16mm] pb-[20mm]"}>
+      <div
+        className={
+          semPadding
+            ? "flex min-h-0 flex-1 flex-col overflow-hidden"
+            : "flex min-h-0 flex-1 flex-col overflow-hidden px-[18mm] pt-[16mm] pb-[6mm]"
+        }
+      >
         {children}
       </div>
       {rodape ? (
-        <div className="absolute inset-x-[18mm] bottom-[10mm] border-t border-line pt-2 text-center text-[7.5pt] leading-snug text-ink/55">
-          {rodape}
-          {numero ? (
-            <span className="ml-2">
-              · Página {numero} de {total}
-            </span>
-          ) : null}
+        <div className="mt-auto shrink-0 bg-white px-[18mm] pb-[10mm]">
+          <div className="border-t border-line pt-2 text-center text-[7.5pt] leading-snug text-ink/55">
+            {rodape}
+            {numero ? (
+              <span className="ml-2">
+                · Página {numero} de {total}
+              </span>
+            ) : null}
+          </div>
         </div>
       ) : null}
     </div>
   );
 }
+
 
 function Cabecalho() {
   return (
