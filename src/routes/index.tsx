@@ -50,8 +50,8 @@ const ETAPAS = [
 
 const HUB_URL = "https://hub-logica.vercel.app";
 
-// Trava de acesso pelo portal Luz.IA temporariamente desativada para edições no Lovable.
-const GATE_LUZIA_ATIVO = false;
+// Acesso liberado somente pelo portal Luz.IA.
+const GATE_LUZIA_ATIVO = true;
 
 function Index() {
   const [estado, setEstado] = useState<"carregando" | "autorizado" | "negado">(
