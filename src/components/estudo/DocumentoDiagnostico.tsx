@@ -59,7 +59,7 @@ function Pagina({
   semPadding?: boolean;
 }) {
   return (
-    <div className="pagina-doc relative mx-auto mb-6 flex w-[210mm] min-h-[297mm] flex-col bg-white shadow-[0_18px_50px_-25px_rgba(0,0,0,0.4)] print:mb-0">
+    <div className="pagina-doc relative mx-auto mb-6 flex h-[297mm] w-[210mm] flex-col overflow-hidden bg-white shadow-[0_18px_50px_-25px_rgba(0,0,0,0.4)] print:mb-0">
       <div className={semPadding ? "flex flex-1 flex-col" : "flex flex-1 flex-col px-[18mm] pt-[16mm] pb-[20mm]"}>
         {children}
       </div>
