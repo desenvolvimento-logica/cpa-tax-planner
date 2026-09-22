@@ -193,20 +193,47 @@
   .no-print {
     display: none !important;
   }
+  html,
   body {
+    margin: 0 !important;
+    padding: 0 !important;
     background: white;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
   .pagina-doc {
     break-after: page;
     page-break-after: always;
+    break-inside: avoid;
+    page-break-inside: avoid;
     box-shadow: none !important;
     margin: 0 !important;
+    padding: 0;
     width: 210mm !important;
-    min-height: 297mm !important;
+    /* altura exata da folha: evita que arredondamentos gerem páginas em branco */
+    height: 297mm !important;
+    min-height: 0 !important;
+    max-height: 297mm !important;
+    overflow: hidden !important;
   }
   .pagina-doc:last-child {
     break-after: auto;
     page-break-after: auto;
+  }
+  /* nada dentro de uma página pode ser quebrado ao meio */
+  .pagina-doc table,
+  .pagina-doc thead,
+  .pagina-doc tbody,
+  .pagina-doc tr,
+  .pagina-doc section,
+  .pagina-doc img,
+  .pagina-doc h1,
+  .pagina-doc h2,
+  .pagina-doc h3,
+  .pagina-doc p,
+  .pagina-doc li {
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 }
 
