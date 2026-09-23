@@ -1,4 +1,4 @@
-import type { Parceiro, Regime, TributacaoNacional } from "./estudo";
+import type { Parceiro, Regime, ResumoNcm, TributacaoNacional } from "./estudo";
 import { REGIMES } from "./estudo";
 
 let contador = 0;
@@ -134,10 +134,36 @@ function extrairTributacoesNacionais(linhas: Linha[]): TributacaoNacional[] {
   return [];
 }
 
+function extrairResumoNcm(linhas: Linha[]): ResumoNcm[] {
+  for (let i = 0; i < Math.min(linhas.length, 15); i++) {
+    const cols = (linhas[i] ?? []).map((c) => semAcento(String(c ?? "")).replace(/\s+/g, ""));
+    const iNcm = cols.findIndex((c) => c === "ncm");
+    const iClass = cols.findIndex((c) => c.includes("cclasstrib"));
+    if (iNcm < 0 || iClass < 0) continue;
+    const iCst = cols.findIndex((c) => c.startsWith("cst"));
+    const iDesc = cols.findIndex((c) => c.includes("produto") && !c.includes("r$"));
+    const iValor = cols.findIndex((c) => c.includes("r$produto") || c === "valor" || c.includes("valortotal"));
+    const mapa = new Map<string, ResumoNcm>();
+    for (const l of linhas.slice(i + 1)) {
+      const ncm = String(l[iNcm] ?? "").trim();
+      if (!ncm) continue;
+      const cst = iCst >= 0 ? String(l[iCst] ?? "").trim().padStart(3, "0") : "";
+      const cClassTrib = String(l[iClass] ?? "").trim().padStart(6, "0");
+      const chave = `${ncm}|${cst}|${cClassTrib}`;
+      const atual = mapa.get(chave) ?? { ncm, descricao: iDesc >= 0 ? String(l[iDesc] ?? "").trim() : "", cst, cClassTrib, itens: 0, valor: 0 };
+      atual.itens += 1;
+      atual.valor += iValor >= 0 ? paraNumero(l[iValor]) : 0;
+      mapa.set(chave, atual);
+    }
+    return [...mapa.values()].sort((a, b) => a.ncm.localeCompare(b.ncm) || a.cClassTrib.localeCompare(b.cClassTrib));
+  }
+  return [];
+}
+
 /** Lê a planilha de regimes (abas de entradas/compras e vendas). */
 export async function parsePlanilhaRegimes(
   file: File,
-): Promise<{ clientes: Parceiro[]; fornecedores: Parceiro[]; faturamento: number[] | null; tributacoesNacionais: TributacaoNacional[] }> {
+): Promise<{ clientes: Parceiro[]; fornecedores: Parceiro[]; faturamento: number[] | null; tributacoesNacionais: TributacaoNacional[]; resumoNcm: ResumoNcm[] }> {
   const XLSX = await import("xlsx");
   const buffer = await file.arrayBuffer();
   const wb = XLSX.read(buffer, { type: "array" });
@@ -146,11 +172,17 @@ export async function parsePlanilhaRegimes(
   let fornecedores: Parceiro[] = [];
   let faturamento: number[] | null = null;
   let tributacoesNacionais: TributacaoNacional[] = [];
+  let resumoNcm: ResumoNcm[] = [];
 
   for (const nomeAba of wb.SheetNames) {
     const aba = wb.Sheets[nomeAba];
     if (!aba) continue;
     const linhas = XLSX.utils.sheet_to_json<Linha>(aba, { header: 1, raw: true, defval: "" });
+    const ncms = extrairResumoNcm(linhas);
+    if (ncms.length) {
+      resumoNcm = resumoNcm.concat(ncms);
+      continue;
+    }
     const codigos = extrairTributacoesNacionais(linhas);
     if (codigos.length) {
       const existentes = new Map(tributacoesNacionais.map((item) => [item.codigo, item]));
@@ -176,5 +208,5 @@ export async function parsePlanilhaRegimes(
     else fornecedores = fornecedores.concat(itens);
   }
 
-  return { clientes, fornecedores, faturamento, tributacoesNacionais };
+  return { clientes, fornecedores, faturamento, tributacoesNacionais, resumoNcm };
 }
