@@ -254,17 +254,56 @@ function somarTributos(linhas: Array<{ nome: string; valores: number[] }>) {
   return [...mapa].map(([nome, valor]) => ({ nome, valor }));
 }
 
+/**
+ * Recompõe valores que o PDF quebrou: centavos na mesma linha ("R$ 15.595,0 8")
+ * ou jogados para as linhas seguintes do mesmo bloco ("R$ 12.022,0" … "2").
+ */
+function repararBloco(bloco: string): string {
+  const linhas = bloco.split("\n");
+  let principal = (linhas[0] ?? "").replace(/(R\$\s*[\d.]+,\d)\s+(\d)(?![\d,.%])/g, "$1$2");
+  const sobras: string[] = [];
+  for (const l of linhas.slice(1)) {
+    for (const t of l.trim().split(/\s+/)) if (/^\d{1,2}$/.test(t)) sobras.push(t);
+  }
+  principal = principal.replace(/(R\$\s*[\d.]+,)(\d?)(?!\d)/g, (m, base: string, dec: string) => {
+    const faltam = 2 - dec.length;
+    const sobra = sobras[0];
+    if (!sobra || sobra.length !== faltam) return m;
+    sobras.shift();
+    return base + dec + sobra;
+  });
+  return principal;
+}
+
+/**
+ * Uma linha de valores por competência. Quando o mês tem mais de uma tributação
+ * (ex.: dois Anexos), usa a linha "soma do mês"; caso contrário, a linha única.
+ */
 function linhasMensais(secao: string): number[][] {
-  const blocos = secao.split(/(?=\b\d{2}\/\d{4}\b)/);
-  return blocos
-    .filter((bloco) => /^\d{2}\/\d{4}/.test(bloco.trim()))
-    .map((bloco) => (bloco.match(RX_MOEDA) ?? []).map(num));
+  const blocos = secao
+    .split(/(?=^\s*\d{2}\/\d{4}\b)/m)
+    .filter((bloco) => /^\s*\d{2}\/\d{4}/.test(bloco));
+  const porMes = new Map<string, { soma?: number[]; linhas: number[][] }>();
+  for (const bloco of blocos) {
+    const comp = bloco.trim().slice(0, 7);
+    const valores = (repararBloco(bloco.trim()).match(RX_MOEDA) ?? []).map(num);
+    const item = porMes.get(comp) ?? { linhas: [] };
+    if (/^\s*\d{2}\/\d{4}\s*—/.test(bloco) || /soma do/i.test(bloco.split("\n").slice(0, 2).join(" "))) item.soma = valores;
+    else item.linhas.push(valores);
+    porMes.set(comp, item);
+  }
+  return [...porMes.values()].map((i) => {
+    if (i.soma) return i.soma;
+    if (i.linhas.length <= 1) return i.linhas[0] ?? [];
+    // sem linha de soma: soma coluna a coluna
+    const n = Math.max(...i.linhas.map((l) => l.length));
+    return Array.from({ length: n }, (_, k) => i.linhas.reduce((a, l) => a + (l[k] ?? 0), 0));
+  });
 }
 
 /** Memória de Cálculo: comparativo mensal completo dos quatro regimes. */
 export function parseMemoriaCalculo(textoOriginal: string): Simulacoes {
-  // O PDF quebra alguns valores no meio ("R$ 15.595,0 8"): reconstitui os centavos.
-  const texto = textoOriginal.replace(/(\d)\s*,\s*(\d)\s*(\d)/g, "$1,$2$3");
+  const texto = textoOriginal;
   const separar = (inicio: RegExp, fim?: RegExp) => {
     const i = texto.search(inicio);
     if (i < 0) return "";
