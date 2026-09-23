@@ -289,14 +289,25 @@ export function parseMemoriaCalculo(textoOriginal: string): Simulacoes {
     { nome: "INSS/CPP", valores: atuais.map((v) => v[5] ?? 0) },
     { nome: "ISS", valores: atuais.map((v) => v[6] ?? 0) },
   ]);
-  // Colunas do demonstrativo (do fim para o início): Total, CBS líquido, Crédito CBS,
-  // CBS bruto, DAS Híbrido, ISS, INSS/CPP, CSLL, IRPJ.
+  // Localiza o DAS Híbrido como o valor que é a soma dos quatro anteriores
+  // (IRPJ + CSLL + INSS/CPP + ISS). Robusto a valores quebrados em outras colunas.
+  // CBS líquido = Total Híbrido − DAS Híbrido.
+  const partesHibrido = hibridos.map((v) => {
+    for (let i = 4; i < v.length; i++) {
+      const [a, b, c, d] = v.slice(i - 4, i) as [number, number, number, number];
+      if (v[i]! > 0 && Math.abs(a + b + c + d - v[i]!) <= 0.05) {
+        const total = v.at(-1) ?? 0;
+        return { irpj: a, csll: b, inss: c, iss: d, cbs: Math.max(0, Math.round((total - v[i]!) * 100) / 100) };
+      }
+    }
+    return { irpj: 0, csll: 0, inss: 0, iss: 0, cbs: 0 };
+  });
   const hibridoTributos = somarTributos([
-    { nome: "IRPJ", valores: hibridos.map((v) => v.at(-9) ?? 0) },
-    { nome: "CSLL", valores: hibridos.map((v) => v.at(-8) ?? 0) },
-    { nome: "INSS/CPP", valores: hibridos.map((v) => v.at(-7) ?? 0) },
-    { nome: "ISS", valores: hibridos.map((v) => v.at(-6) ?? 0) },
-    { nome: "CBS", valores: hibridos.map((v) => v.at(-2) ?? 0) },
+    { nome: "IRPJ", valores: partesHibrido.map((p) => p.irpj) },
+    { nome: "CSLL", valores: partesHibrido.map((p) => p.csll) },
+    { nome: "INSS/CPP", valores: partesHibrido.map((p) => p.inss) },
+    { nome: "ISS", valores: partesHibrido.map((p) => p.iss) },
+    { nome: "CBS", valores: partesHibrido.map((p) => p.cbs) },
   ]);
   const tributosRegular = (linhas: number[][], real: boolean) => somarTributos([
     { nome: "ISS", valores: linhas.map((v) => v[2] ?? 0) },
