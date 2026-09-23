@@ -595,7 +595,7 @@ export async function importarArquivos(
           clientes: clientes.length ? clientes : estudo.clientes,
           fornecedores: fornecedores.length ? fornecedores : estudo.fornecedores,
           tributacoesNacionais: tributacoesMescladas.length ? tributacoesMescladas : estudo.tributacoesNacionais,
-          resumoNcm: resumoNcm.length ? resumoNcm : estudo.resumoNcm,
+          resumoNcm: resumoNcm.length ? resumoNcm : (estudo.resumoNcm ?? []),
         };
         resultados.push({
           nome: arquivo.name,
