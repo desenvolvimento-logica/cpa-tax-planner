@@ -262,7 +262,9 @@ function linhasMensais(secao: string): number[][] {
 }
 
 /** Memória de Cálculo: comparativo mensal completo dos quatro regimes. */
-export function parseMemoriaCalculo(texto: string): Simulacoes {
+export function parseMemoriaCalculo(textoOriginal: string): Simulacoes {
+  // O PDF quebra alguns valores no meio ("R$ 15.595,0 8"): reconstitui os centavos.
+  const texto = textoOriginal.replace(/(\d)\s*,\s*(\d)\s*(\d)/g, "$1,$2$3");
   const separar = (inicio: RegExp, fim?: RegExp) => {
     const i = texto.search(inicio);
     if (i < 0) return "";
