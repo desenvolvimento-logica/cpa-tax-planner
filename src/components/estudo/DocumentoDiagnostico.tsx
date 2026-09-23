@@ -1,3 +1,4 @@
+import { TabelaNcm } from "./TabelaNcm";
 import capa from "@/assets/capa-diagnostico.jpg";
 import logoLogica from "@/assets/logica-na-reforma.jpg.asset.json";
 import {
@@ -339,6 +340,12 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
                 ))}
               </tbody>
             </table>
+          </>
+        ) : null}
+        {estudo.resumoNcm?.length ? (
+          <>
+            <Titulo>Resumo por NCM e cClassTrib</Titulo>
+            <TabelaNcm itens={estudo.resumoNcm} documento />
           </>
         ) : null}
         <TabelaPerfil

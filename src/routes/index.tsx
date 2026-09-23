@@ -9,6 +9,7 @@ import { SecaoParceiros } from "@/components/estudo/SecaoParceiros";
 import { SecaoSimulacoes } from "@/components/estudo/SecaoSimulacoes";
 import { SecaoDiagnostico } from "@/components/estudo/SecaoDiagnostico";
 import { DocumentoDiagnostico } from "@/components/estudo/DocumentoDiagnostico";
+import { TabelaNcm } from "@/components/estudo/TabelaNcm";
 import { CampoTexto } from "@/components/estudo/campos";
 import logoLogica from "@/assets/logica-na-reforma.jpg.asset.json";
 import { estudoVazio } from "@/lib/estudo";
@@ -261,6 +262,14 @@ function EstudoApp() {
               onChangeTributacoes={(tributacoesNacionais) => atualizar({ tributacoesNacionais })}
             />
           </div>
+          {estudo.resumoNcm?.length ? (
+            <section className="painel clip-tilt min-w-0 p-6">
+              <h2 className="font-display text-sm font-semibold uppercase tracking-widest text-brand">
+                Resumo por NCM e cClassTrib
+              </h2>
+              <TabelaNcm itens={estudo.resumoNcm} />
+            </section>
+          ) : null}
           <div id="folha" className="min-w-0 scroll-mt-6">
             <SecaoFolha valores={estudo.folha} onChange={(folha) => atualizar({ folha })} />
           </div>

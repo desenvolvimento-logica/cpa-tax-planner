@@ -52,6 +52,15 @@ export type CnaeItem = {
   anexo: string;
 };
 
+export type ResumoNcm = {
+  ncm: string;
+  descricao: string;
+  cst: string;
+  cClassTrib: string;
+  itens: number;
+  valor: number;
+};
+
 export type TributacaoNacional = {
   id: string;
   codigo: string;
@@ -144,6 +153,7 @@ export type Estudo = {
   cnaes: CnaeItem[];
   faturamento: number[];
   tributacoesNacionais: TributacaoNacional[];
+  resumoNcm?: ResumoNcm[];
   folha: number[];
   fornecedores: Parceiro[];
   clientes: Parceiro[];
