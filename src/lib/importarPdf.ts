@@ -262,7 +262,9 @@ function linhasMensais(secao: string): number[][] {
 }
 
 /** Memória de Cálculo: comparativo mensal completo dos quatro regimes. */
-export function parseMemoriaCalculo(texto: string): Simulacoes {
+export function parseMemoriaCalculo(textoOriginal: string): Simulacoes {
+  // O PDF quebra alguns valores no meio ("R$ 15.595,0 8"): reconstitui os centavos.
+  const texto = textoOriginal.replace(/(\d)\s*,\s*(\d)\s*(\d)/g, "$1,$2$3");
   const separar = (inicio: RegExp, fim?: RegExp) => {
     const i = texto.search(inicio);
     if (i < 0) return "";
@@ -287,22 +289,14 @@ export function parseMemoriaCalculo(texto: string): Simulacoes {
     { nome: "INSS/CPP", valores: atuais.map((v) => v[5] ?? 0) },
     { nome: "ISS", valores: atuais.map((v) => v[6] ?? 0) },
   ]);
+  // Colunas do demonstrativo (do fim para o início): Total, CBS líquido, Crédito CBS,
+  // CBS bruto, DAS Híbrido, ISS, INSS/CPP, CSLL, IRPJ.
   const hibridoTributos = somarTributos([
-    { nome: "IRPJ", valores: hibridos.map((v) => v[1] ?? 0) },
-    { nome: "CSLL", valores: hibridos.map((v) => v[2] ?? 0) },
-    {
-      nome: "INSS/CPP",
-      valores: hibridos.map((v) => {
-        const receita = v[0] ?? 0;
-        const irpj = v[1] ?? 0;
-        const csll = v[2] ?? 0;
-        const iss = receita * 0.05;
-        const das = v.at(-3) ?? 0;
-        return Math.max(0, das - irpj - csll - iss);
-      }),
-    },
-    { nome: "ISS", valores: hibridos.map((v) => (v[0] ?? 0) * 0.05) },
-    { nome: "CBS", valores: hibridos.map((v) => (v.at(-1) ?? 0) - (v.at(-3) ?? 0)) },
+    { nome: "IRPJ", valores: hibridos.map((v) => v.at(-9) ?? 0) },
+    { nome: "CSLL", valores: hibridos.map((v) => v.at(-8) ?? 0) },
+    { nome: "INSS/CPP", valores: hibridos.map((v) => v.at(-7) ?? 0) },
+    { nome: "ISS", valores: hibridos.map((v) => v.at(-6) ?? 0) },
+    { nome: "CBS", valores: hibridos.map((v) => v.at(-2) ?? 0) },
   ]);
   const tributosRegular = (linhas: number[][], real: boolean) => somarTributos([
     { nome: "ISS", valores: linhas.map((v) => v[2] ?? 0) },
