@@ -258,17 +258,25 @@ function somarTributos(linhas: Array<{ nome: string; valores: number[] }>) {
  * Recompõe valores que o PDF quebrou: centavos na mesma linha ("R$ 15.595,0 8")
  * ou jogados para as linhas seguintes do mesmo bloco ("R$ 12.022,0" … "2").
  */
-function repararBloco(bloco: string): string {
+function repararBloco(bloco: string, preencherTracos = false): string {
   const linhas = bloco.split("\n");
   let principal = (linhas[0] ?? "").replace(/(R\$\s*[\d.]+,\d)\s+(\d)(?![\d,.%])/g, "$1$2");
+  if (preencherTracos) principal = principal.replace(/(\s)—(?=\s|$)/g, "$1R$ 0,00");
   const sobras: string[] = [];
   for (const l of linhas.slice(1)) {
-    for (const t of l.trim().split(/\s+/)) if (/^\d{1,2}$/.test(t)) sobras.push(t);
+    for (const t of l.trim().split(/\s+/)) if (/^,?\d{1,2}$/.test(t)) sobras.push(t);
   }
-  principal = principal.replace(/(R\$\s*[\d.]+,)(\d?)(?!\d)/g, (m, base: string, dec: string) => {
-    const faltam = 2 - dec.length;
+  principal = principal.replace(/(R\$\s*\d{1,3}(?:\.\d{3})*)(,\d{0,2})?/g, (m, base: string, dec?: string) => {
     const sobra = sobras[0];
-    if (!sobra || sobra.length !== faltam) return m;
+    if (dec === undefined) {
+      // valor sem vírgula: os centavos vieram na linha de baixo (",35")
+      if (!sobra || !/^,\d{2}$/.test(sobra)) return m;
+      sobras.shift();
+      return base + sobra;
+    }
+    const faltam = 3 - dec.length;
+    if (faltam === 0) return m;
+    if (!sobra || sobra.startsWith(",") || sobra.length !== faltam) return m;
     sobras.shift();
     return base + dec + sobra;
   });
@@ -279,16 +287,16 @@ function repararBloco(bloco: string): string {
  * Uma linha de valores por competência. Quando o mês tem mais de uma tributação
  * (ex.: dois Anexos), usa a linha "soma do mês"; caso contrário, a linha única.
  */
-function linhasMensais(secao: string): number[][] {
+function linhasMensais(secao: string, preencherTracos = false): number[][] {
   const blocos = secao
     .split(/(?=^\s*\d{2}\/\d{4}\b)/m)
     .filter((bloco) => /^\s*\d{2}\/\d{4}/.test(bloco));
   const porMes = new Map<string, { soma?: number[]; linhas: number[][] }>();
   for (const bloco of blocos) {
     const comp = bloco.trim().slice(0, 7);
-    const valores = (repararBloco(bloco.trim()).match(RX_MOEDA) ?? []).map(num);
+    const valores = (repararBloco(bloco.trim(), preencherTracos).match(RX_MOEDA) ?? []).map(num);
     const item = porMes.get(comp) ?? { linhas: [] };
-    if (/^\s*\d{2}\/\d{4}\s*—/.test(bloco) || /soma do/i.test(bloco.split("\n").slice(0, 2).join(" "))) item.soma = valores;
+    if (/^\s*\d{2}\/\d{4}[ \t]*—/.test(bloco) || /soma do/i.test(bloco.split("\n").slice(0, 2).join(" "))) item.soma = valores;
     else item.linhas.push(valores);
     porMes.set(comp, item);
   }
@@ -300,6 +308,9 @@ function linhasMensais(secao: string): number[][] {
     return Array.from({ length: n }, (_, k) => i.linhas.reduce((a, l) => a + (l[k] ?? 0), 0));
   });
 }
+
+/** Cabeçalho da seção (antes da primeira competência). */
+const cabecalho = (secao: string) => secao.split(/^\s*\d{2}\/\d{4}\b/m)[0] ?? "";
 
 /** Memória de Cálculo: comparativo mensal completo dos quatro regimes. */
 export function parseMemoriaCalculo(textoOriginal: string): Simulacoes {
