@@ -258,17 +258,25 @@ function somarTributos(linhas: Array<{ nome: string; valores: number[] }>) {
  * Recompõe valores que o PDF quebrou: centavos na mesma linha ("R$ 15.595,0 8")
  * ou jogados para as linhas seguintes do mesmo bloco ("R$ 12.022,0" … "2").
  */
-function repararBloco(bloco: string): string {
+function repararBloco(bloco: string, preencherTracos = false): string {
   const linhas = bloco.split("\n");
   let principal = (linhas[0] ?? "").replace(/(R\$\s*[\d.]+,\d)\s+(\d)(?![\d,.%])/g, "$1$2");
+  if (preencherTracos) principal = principal.replace(/(\s)—(?=\s|$)/g, "$1R$ 0,00");
   const sobras: string[] = [];
   for (const l of linhas.slice(1)) {
-    for (const t of l.trim().split(/\s+/)) if (/^\d{1,2}$/.test(t)) sobras.push(t);
+    for (const t of l.trim().split(/\s+/)) if (/^,?\d{1,2}$/.test(t)) sobras.push(t);
   }
-  principal = principal.replace(/(R\$\s*[\d.]+,)(\d?)(?!\d)/g, (m, base: string, dec: string) => {
-    const faltam = 2 - dec.length;
+  principal = principal.replace(/(R\$\s*\d{1,3}(?:\.\d{3})*)(,\d{0,2})?/g, (m, base: string, dec?: string) => {
     const sobra = sobras[0];
-    if (!sobra || sobra.length !== faltam) return m;
+    if (dec === undefined) {
+      // valor sem vírgula: os centavos vieram na linha de baixo (",35")
+      if (!sobra || !/^,\d{2}$/.test(sobra)) return m;
+      sobras.shift();
+      return base + sobra;
+    }
+    const faltam = 3 - dec.length;
+    if (faltam === 0) return m;
+    if (!sobra || sobra.startsWith(",") || sobra.length !== faltam) return m;
     sobras.shift();
     return base + dec + sobra;
   });
@@ -279,16 +287,16 @@ function repararBloco(bloco: string): string {
  * Uma linha de valores por competência. Quando o mês tem mais de uma tributação
  * (ex.: dois Anexos), usa a linha "soma do mês"; caso contrário, a linha única.
  */
-function linhasMensais(secao: string): number[][] {
+function linhasMensais(secao: string, preencherTracos = false): number[][] {
   const blocos = secao
     .split(/(?=^\s*\d{2}\/\d{4}\b)/m)
     .filter((bloco) => /^\s*\d{2}\/\d{4}/.test(bloco));
   const porMes = new Map<string, { soma?: number[]; linhas: number[][] }>();
   for (const bloco of blocos) {
     const comp = bloco.trim().slice(0, 7);
-    const valores = (repararBloco(bloco.trim()).match(RX_MOEDA) ?? []).map(num);
+    const valores = (repararBloco(bloco.trim(), preencherTracos).match(RX_MOEDA) ?? []).map(num);
     const item = porMes.get(comp) ?? { linhas: [] };
-    if (/^\s*\d{2}\/\d{4}\s*—/.test(bloco) || /soma do/i.test(bloco.split("\n").slice(0, 2).join(" "))) item.soma = valores;
+    if (/^\s*\d{2}\/\d{4}[ \t]*—/.test(bloco) || /soma do/i.test(bloco.split("\n").slice(0, 2).join(" "))) item.soma = valores;
     else item.linhas.push(valores);
     porMes.set(comp, item);
   }
@@ -301,6 +309,11 @@ function linhasMensais(secao: string): number[][] {
   });
 }
 
+/** Cabeçalho da seção (antes da primeira competência). */
+const cabecalho = (secao: string) => secao.split(/^\s*\d{2}\/\d{4}\b/m)[0] ?? "";
+/** Linha de títulos das colunas (a que começa com "Competência"). */
+const linhaColunas = (secao: string) => cabecalho(secao).split("\n").find((l) => /^\s*Compet/i.test(l)) ?? "";
+
 /** Memória de Cálculo: comparativo mensal completo dos quatro regimes. */
 export function parseMemoriaCalculo(textoOriginal: string): Simulacoes {
   const texto = textoOriginal;
@@ -311,44 +324,61 @@ export function parseMemoriaCalculo(textoOriginal: string): Simulacoes {
     const j = fim ? restante.slice(1).search(fim) : -1;
     return j >= 0 ? restante.slice(0, j + 1) : restante;
   };
-  const atuais = linhasMensais(separar(/1\.\s*Simples Nacional Atual/i, /2\.\s*Simples Nacional H[ií]brido/i));
-  const hibridos = linhasMensais(separar(/2\.\s*Simples Nacional H[ií]brido/i, /3\.\s*Lucro Presumido/i));
-  const presumidos = linhasMensais(separar(/3\.\s*Lucro Presumido/i, /4\.\s*Lucro Real/i));
-  const reais = linhasMensais(separar(/4\.\s*Lucro Real/i));
+  const secAtual = separar(/1\.\s*Simples Nacional Atual/i, /2\.\s*Simples Nacional H[ií]brido/i);
+  const secHibrido = separar(/2\.\s*Simples Nacional H[ií]brido/i, /3\.\s*Lucro Presumido/i);
+  const secPresumido = separar(/3\.\s*Lucro Presumido/i, /4\.\s*Lucro Real/i);
+  const secReal = separar(/4\.\s*Lucro Real/i);
+  // Comércio/indústria (Anexo I/II): colunas de ICMS e, no Anexo II, IPI.
+  const comIcms = (sec: string) => /\bICMS\b/.test(linhaColunas(sec));
+  const comIpi = (sec: string) => /\bIPI\b/.test(linhaColunas(sec));
+  const comercio = comIcms(secAtual) || comIcms(secHibrido) || comIcms(secPresumido);
+  const atuais = linhasMensais(secAtual, comercio);
+  const hibridos = linhasMensais(secHibrido);
+  const presumidos = linhasMensais(secPresumido, comercio);
+  const reais = linhasMensais(secReal, comercio);
   const mensal = (linhas: number[][], indice: (valores: number[]) => number) => {
     const valores = zeros();
     linhas.slice(0, 12).forEach((linha, i) => { valores[i] = indice(linha); });
     return valores;
   };
-  const atualTributos = somarTributos([
-    { nome: "IRPJ", valores: atuais.map((v) => v[1] ?? 0) },
-    { nome: "CSLL", valores: atuais.map((v) => v[2] ?? 0) },
-    { nome: "COFINS", valores: atuais.map((v) => v[3] ?? 0) },
-    { nome: "PIS", valores: atuais.map((v) => v[4] ?? 0) },
-    { nome: "INSS/CPP", valores: atuais.map((v) => v[5] ?? 0) },
-    { nome: "ISS", valores: atuais.map((v) => v[6] ?? 0) },
-  ]);
-  // Localiza o DAS Híbrido como o valor que é a soma dos quatro anteriores
-  // (IRPJ + CSLL + INSS/CPP + ISS). Robusto a valores quebrados em outras colunas.
-  // CBS líquido = Total Híbrido − DAS Híbrido.
+
+  // Simples Atual: colunas na ordem do cabeçalho (índice 0 = receita).
+  let colunasAtual = ["IRPJ", "CSLL", "COFINS", "PIS", "INSS/CPP", "ISS", "Total DAS"];
+  if (comercio) {
+    const linhaCab = cabecalho(secAtual).split("\n").find((l) => /Total DAS/i.test(l)) ?? "";
+    const achados = linhaCab.match(/IRPJ|CSLL|COFINS|PIS|INSS\/CPP|ICMS|IPI|ISS|Total DAS/g);
+    if (achados?.includes("Total DAS")) colunasAtual = achados;
+  }
+  const idxAtual = (nome: string) => colunasAtual.indexOf(nome) + 1;
+  const atualTributos = somarTributos(
+    colunasAtual
+      .filter((n) => n !== "Total DAS")
+      .map((nome) => ({ nome, valores: atuais.map((v) => v[idxAtual(nome)] ?? 0) })),
+  );
+
+  // Localiza o DAS Híbrido como o valor que é a soma dos tributos anteriores
+  // (IRPJ + CSLL + INSS/CPP + ISS, ou ICMS/IPI no comércio). CBS líquido = Total − DAS.
+  const nomesDas = comIcms(secHibrido)
+    ? ["IRPJ", "CSLL", "INSS/CPP", "ICMS", ...(comIpi(secHibrido) ? ["IPI"] : [])]
+    : ["IRPJ", "CSLL", "INSS/CPP", "ISS"];
+  const k = nomesDas.length;
   const partesHibrido = hibridos.map((v) => {
-    for (let i = 4; i < v.length; i++) {
-      const [a, b, c, d] = v.slice(i - 4, i) as [number, number, number, number];
-      if (v[i]! > 0 && Math.abs(a + b + c + d - v[i]!) <= 0.05) {
+    for (let i = k; i < v.length; i++) {
+      const partes = v.slice(i - k, i);
+      const somaPartes = partes.reduce((x, y) => x + y, 0);
+      if (v[i]! > 0 && Math.abs(somaPartes - v[i]!) <= 0.05) {
         const total = v.at(-1) ?? 0;
-        return { irpj: a, csll: b, inss: c, iss: d, cbs: Math.max(0, Math.round((total - v[i]!) * 100) / 100) };
+        return { partes, cbs: Math.max(0, Math.round((total - v[i]!) * 100) / 100) };
       }
     }
-    return { irpj: 0, csll: 0, inss: 0, iss: 0, cbs: 0 };
+    return { partes: nomesDas.map(() => 0), cbs: 0 };
   });
   const hibridoTributos = somarTributos([
-    { nome: "IRPJ", valores: partesHibrido.map((p) => p.irpj) },
-    { nome: "CSLL", valores: partesHibrido.map((p) => p.csll) },
-    { nome: "INSS/CPP", valores: partesHibrido.map((p) => p.inss) },
-    { nome: "ISS", valores: partesHibrido.map((p) => p.iss) },
+    ...nomesDas.map((nome, j) => ({ nome, valores: partesHibrido.map((p) => p.partes[j] ?? 0) })),
     { nome: "CBS", valores: partesHibrido.map((p) => p.cbs) },
   ]);
-  const tributosRegular = (linhas: number[][], real: boolean) => somarTributos([
+
+  const tributosServico = (linhas: number[][], real: boolean) => somarTributos([
     { nome: "ISS", valores: linhas.map((v) => v[2] ?? 0) },
     { nome: "INSS/CPP", valores: linhas.map((v) => v[3] ?? 0) },
     { nome: "CBS", valores: linhas.map((v) => v[6] ?? 0) },
@@ -356,19 +386,35 @@ export function parseMemoriaCalculo(textoOriginal: string): Simulacoes {
     { nome: "Adicional IRPJ", valores: linhas.map((v) => real ? (v.length >= 12 ? v[9] ?? 0 : 0) : (v.length >= 11 ? v[8] ?? 0 : 0)) },
     { nome: "CSLL", valores: linhas.map((v) => real ? (v.length >= 12 ? v[10] ?? 0 : 0) : (v.length >= 11 ? v[9] ?? 0 : 0)) },
   ]);
+  // Comércio: Receita, Folha, ICMS (déb/créd/líq), [IPI (déb/créd/líq)], CPP,
+  // CBS (bruto/créd/líq), [Resultado DRE], IRPJ, Adicional, CSLL, Total.
+  const tributosComercio = (linhas: number[][], sec: string, real: boolean) => {
+    const cols = ["rec", "folha", "icmsD", "icmsC", "ICMS", ...(comIpi(sec) ? ["ipiD", "ipiC", "IPI"] : []),
+      "INSS/CPP", "cbsB", "cbsC", "CBS", ...(real ? ["res"] : []), "IRPJ", "Adicional IRPJ", "CSLL", "total"];
+    const col = (n: string) => cols.indexOf(n);
+    return somarTributos(
+      ["ICMS", "IPI", "INSS/CPP", "CBS", "IRPJ", "Adicional IRPJ", "CSLL"]
+        .filter((n) => col(n) >= 0)
+        .map((nome) => ({ nome, valores: linhas.map((v) => (v.length === cols.length ? v[col(nome)] ?? 0 : 0)) })),
+    );
+  };
+  const tributosRegular = (linhas: number[][], sec: string, real: boolean) =>
+    comIcms(sec) ? tributosComercio(linhas, sec, real) : tributosServico(linhas, real);
+
   return {
-    simplesAtual: mensal(atuais, (v) => v[7] ?? 0),
+    simplesAtual: mensal(atuais, (v) => v[idxAtual("Total DAS")] ?? 0),
     simplesHibrido: mensal(hibridos, (v) => v.at(-1) ?? 0),
     lucroPresumido: mensal(presumidos, (v) => v.at(-1) ?? 0),
     lucroReal: mensal(reais, (v) => v.at(-1) ?? 0),
     tributos: {
       simplesAtual: atualTributos,
       simplesHibrido: hibridoTributos,
-      lucroPresumido: tributosRegular(presumidos, false),
-      lucroReal: tributosRegular(reais, true),
+      lucroPresumido: tributosRegular(presumidos, secPresumido, false),
+      lucroReal: tributosRegular(reais, secReal, true),
     },
   };
 }
+
 
 export function parseRegimes(texto: string): { clientes: Parceiro[]; fornecedores: Parceiro[] } {
   const clientes: Parceiro[] = [];

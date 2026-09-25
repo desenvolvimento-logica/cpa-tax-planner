@@ -93,10 +93,15 @@ export const ORDEM_TRIBUTOS = [
   "CSLL",
   "INSS/CPP",
   "ISS",
+  "ICMS",
+  "IPI",
   "PIS/Pasep",
   "COFINS",
   "CBS",
 ] as const;
+
+/** Só aparecem quando a empresa tem valor (comércio/indústria). */
+export const TRIBUTOS_OPCIONAIS = new Set<string>(["ICMS", "IPI"]);
 
 const normalizarNomeTributo = (nome: string) => {
   const chave = nome.toLowerCase().replace(/\s+/g, " ").trim();
@@ -113,7 +118,9 @@ export function ordenarTributos(tributos: TributoLinha[]): TributoLinha[] {
     const nome = normalizarNomeTributo(tributo.nome);
     consolidados.set(nome, (consolidados.get(nome) ?? 0) + tributo.valor);
   }
-  return ORDEM_TRIBUTOS.map((nome) => ({ nome, valor: consolidados.get(nome) ?? 0 }));
+  return ORDEM_TRIBUTOS.map((nome) => ({ nome, valor: consolidados.get(nome) ?? 0 })).filter(
+    (t) => !TRIBUTOS_OPCIONAIS.has(t.nome) || t.valor !== 0,
+  );
 }
 
 export type Simulacoes = {
