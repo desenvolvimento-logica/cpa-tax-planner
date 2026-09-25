@@ -311,6 +311,8 @@ function linhasMensais(secao: string, preencherTracos = false): number[][] {
 
 /** Cabeçalho da seção (antes da primeira competência). */
 const cabecalho = (secao: string) => secao.split(/^\s*\d{2}\/\d{4}\b/m)[0] ?? "";
+/** Linha de títulos das colunas (a que começa com "Competência"). */
+const linhaColunas = (secao: string) => cabecalho(secao).split("\n").find((l) => /^\s*Compet/i.test(l)) ?? "";
 
 /** Memória de Cálculo: comparativo mensal completo dos quatro regimes. */
 export function parseMemoriaCalculo(textoOriginal: string): Simulacoes {
@@ -327,8 +329,8 @@ export function parseMemoriaCalculo(textoOriginal: string): Simulacoes {
   const secPresumido = separar(/3\.\s*Lucro Presumido/i, /4\.\s*Lucro Real/i);
   const secReal = separar(/4\.\s*Lucro Real/i);
   // Comércio/indústria (Anexo I/II): colunas de ICMS e, no Anexo II, IPI.
-  const comIcms = (sec: string) => /ICMS/.test(cabecalho(sec));
-  const comIpi = (sec: string) => /\bIPI\b/.test(cabecalho(sec));
+  const comIcms = (sec: string) => /\bICMS\b/.test(linhaColunas(sec));
+  const comIpi = (sec: string) => /\bIPI\b/.test(linhaColunas(sec));
   const comercio = comIcms(secAtual) || comIcms(secHibrido) || comIcms(secPresumido);
   const atuais = linhasMensais(secAtual, comercio);
   const hibridos = linhasMensais(secHibrido);
