@@ -7,6 +7,7 @@ import {
   agruparPorRegime,
   brlExato,
   ORDEM_TRIBUTOS,
+  TRIBUTOS_OPCIONAIS,
   ordenarTributos,
   pct,
   soma,
@@ -466,7 +467,9 @@ export function DocumentoDiagnostico({ estudo }: { estudo: Estudo }) {
                 </tr>
               </thead>
               <tbody className="text-center">
-                {ORDEM_TRIBUTOS.map((nome) => (
+                {ORDEM_TRIBUTOS.filter(
+                  (nome) => !TRIBUTOS_OPCIONAIS.has(nome) || cenarios.some((c) => c.tributos.some((t) => t.nome === nome && t.valor !== 0)),
+                ).map((nome) => (
                   <tr key={nome}>
                     <td className="border border-line px-2 py-1.5 font-medium">{nome}</td>
                     {cenarios.map((c) => {
