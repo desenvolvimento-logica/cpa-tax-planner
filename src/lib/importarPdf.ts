@@ -261,7 +261,11 @@ function somarTributos(linhas: Array<{ nome: string; valores: number[] }>) {
 function repararBloco(bloco: string, preencherTracos = false): string {
   const linhas = bloco.split("\n");
   let principal = (linhas[0] ?? "").replace(/(R\$\s*[\d.]+,\d)\s+(\d)(?![\d,.%])/g, "$1$2");
-  if (preencherTracos) principal = principal.replace(/(\s)—(?=\s|$)/g, "$1R$ 0,00");
+  if (preencherTracos) {
+    // o "—" logo após a competência é o rótulo "— soma do mês", não um valor
+    const prefixo = principal.match(/^\s*\d{2}\/\d{4}[ \t]*—?/)?.[0] ?? "";
+    principal = prefixo + principal.slice(prefixo.length).replace(/(\s)—(?=\s|$)/g, "$1R$ 0,00");
+  }
   const sobras: string[] = [];
   for (const l of linhas.slice(1)) {
     for (const t of l.trim().split(/\s+/)) if (/^,?\d{1,2}$/.test(t)) sobras.push(t);
@@ -309,6 +313,20 @@ function linhasMensais(secao: string, preencherTracos = false): number[][] {
   });
 }
 
+/** Linhas individuais (sem "soma do mês") com o Anexo de cada uma. */
+function linhasPorAnexo(secao: string): Array<{ anexo: string; valores: number[] }> {
+  return secao
+    .split(/(?=^\s*\d{2}\/\d{4}\b)/m)
+    .filter((bloco) => /^\s*\d{2}\/\d{4}/.test(bloco))
+    .filter((bloco) => !(/^\s*\d{2}\/\d{4}[ \t]*—/.test(bloco) || /soma do/i.test(bloco.split("\n").slice(0, 2).join(" "))))
+    .map((bloco) => {
+      const primeira = (bloco.trim().split("\n")[0] ?? "").slice(7).replace(/\(Anexo[^)]*\)/g, " ");
+      const anexo = primeira.match(/(?:^|\s)(I{1,3}|IV|V)(?=\s)/)?.[1] ?? "";
+      return { anexo, valores: (repararBloco(bloco.trim()).match(RX_MOEDA) ?? []).map(num) };
+    });
+}
+const ehComercio = (anexo: string) => anexo === "I" || anexo === "II";
+
 /** Cabeçalho da seção (antes da primeira competência). */
 const cabecalho = (secao: string) => secao.split(/^\s*\d{2}\/\d{4}\b/m)[0] ?? "";
 /** Linha de títulos das colunas (a que começa com "Competência"). */
@@ -343,26 +361,38 @@ export function parseMemoriaCalculo(textoOriginal: string): Simulacoes {
   };
 
   // Simples Atual: colunas na ordem do cabeçalho (índice 0 = receita).
+  // Empresa mista (Anexo I + III): coluna única "ICMS/ISS", separada por Anexo.
+  const mistoAtual = /ICMS\/ISS/.test(linhaColunas(secAtual));
+  const mistoHibrido = /ICMS\/ISS/.test(linhaColunas(secHibrido));
   let colunasAtual = ["IRPJ", "CSLL", "COFINS", "PIS", "INSS/CPP", "ISS", "Total DAS"];
   if (comercio) {
     const linhaCab = cabecalho(secAtual).split("\n").find((l) => /Total DAS/i.test(l)) ?? "";
-    const achados = linhaCab.match(/IRPJ|CSLL|COFINS|PIS|INSS\/CPP|ICMS|IPI|ISS|Total DAS/g);
+    const achados = linhaCab.match(/IRPJ|CSLL|COFINS|PIS|INSS\/CPP|ICMS\/ISS|ICMS|IPI|ISS|Total DAS/g);
     if (achados?.includes("Total DAS")) colunasAtual = achados;
   }
   const idxAtual = (nome: string) => colunasAtual.indexOf(nome) + 1;
-  const atualTributos = somarTributos(
-    colunasAtual
-      .filter((n) => n !== "Total DAS")
+  const separarMisto = (itens: Array<{ anexo: string; valor: number }>) => [
+    { nome: "ICMS", valores: itens.filter((i) => ehComercio(i.anexo)).map((i) => i.valor) },
+    { nome: "ISS", valores: itens.filter((i) => !ehComercio(i.anexo)).map((i) => i.valor) },
+  ];
+  const atualTributos = somarTributos([
+    ...colunasAtual
+      .filter((n) => n !== "Total DAS" && n !== "ICMS/ISS")
       .map((nome) => ({ nome, valores: atuais.map((v) => v[idxAtual(nome)] ?? 0) })),
-  );
+    ...(mistoAtual
+      ? separarMisto(linhasPorAnexo(secAtual).map((l) => ({ anexo: l.anexo, valor: l.valores[idxAtual("ICMS/ISS")] ?? 0 })))
+      : []),
+  ]);
 
   // Localiza o DAS Híbrido como o valor que é a soma dos tributos anteriores
   // (IRPJ + CSLL + INSS/CPP + ISS, ou ICMS/IPI no comércio). CBS líquido = Total − DAS.
-  const nomesDas = comIcms(secHibrido)
-    ? ["IRPJ", "CSLL", "INSS/CPP", "ICMS", ...(comIpi(secHibrido) ? ["IPI"] : [])]
-    : ["IRPJ", "CSLL", "INSS/CPP", "ISS"];
+  const nomesDas = mistoHibrido
+    ? ["IRPJ", "CSLL", "INSS/CPP", "ICMS/ISS"]
+    : comIcms(secHibrido)
+      ? ["IRPJ", "CSLL", "INSS/CPP", "ICMS", ...(comIpi(secHibrido) ? ["IPI"] : [])]
+      : ["IRPJ", "CSLL", "INSS/CPP", "ISS"];
   const k = nomesDas.length;
-  const partesHibrido = hibridos.map((v) => {
+  const decomporHibrido = (v: number[]) => {
     for (let i = k; i < v.length; i++) {
       const partes = v.slice(i - k, i);
       const somaPartes = partes.reduce((x, y) => x + y, 0);
@@ -372,9 +402,15 @@ export function parseMemoriaCalculo(textoOriginal: string): Simulacoes {
       }
     }
     return { partes: nomesDas.map(() => 0), cbs: 0 };
-  });
+  };
+  const partesHibrido = hibridos.map(decomporHibrido);
   const hibridoTributos = somarTributos([
-    ...nomesDas.map((nome, j) => ({ nome, valores: partesHibrido.map((p) => p.partes[j] ?? 0) })),
+    ...nomesDas
+      .map((nome, j) => ({ nome, valores: partesHibrido.map((p) => p.partes[j] ?? 0) }))
+      .filter((l) => l.nome !== "ICMS/ISS"),
+    ...(mistoHibrido
+      ? separarMisto(linhasPorAnexo(secHibrido).map((l) => ({ anexo: l.anexo, valor: decomporHibrido(l.valores).partes[k - 1] ?? 0 })))
+      : []),
     { nome: "CBS", valores: partesHibrido.map((p) => p.cbs) },
   ]);
 
@@ -390,10 +426,11 @@ export function parseMemoriaCalculo(textoOriginal: string): Simulacoes {
   // CBS (bruto/créd/líq), [Resultado DRE], IRPJ, Adicional, CSLL, Total.
   const tributosComercio = (linhas: number[][], sec: string, real: boolean) => {
     const cols = ["rec", "folha", "icmsD", "icmsC", "ICMS", ...(comIpi(sec) ? ["ipiD", "ipiC", "IPI"] : []),
+      ...(/\bISS\b/.test(linhaColunas(sec)) ? ["ISS"] : []),
       "INSS/CPP", "cbsB", "cbsC", "CBS", ...(real ? ["res"] : []), "IRPJ", "Adicional IRPJ", "CSLL", "total"];
     const col = (n: string) => cols.indexOf(n);
     return somarTributos(
-      ["ICMS", "IPI", "INSS/CPP", "CBS", "IRPJ", "Adicional IRPJ", "CSLL"]
+      ["ICMS", "IPI", "ISS", "INSS/CPP", "CBS", "IRPJ", "Adicional IRPJ", "CSLL"]
         .filter((n) => col(n) >= 0)
         .map((nome) => ({ nome, valores: linhas.map((v) => (v.length === cols.length ? v[col(nome)] ?? 0 : 0)) })),
     );
