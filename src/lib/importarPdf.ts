@@ -357,26 +357,38 @@ export function parseMemoriaCalculo(textoOriginal: string): Simulacoes {
   };
 
   // Simples Atual: colunas na ordem do cabeçalho (índice 0 = receita).
+  // Empresa mista (Anexo I + III): coluna única "ICMS/ISS", separada por Anexo.
+  const mistoAtual = /ICMS\/ISS/.test(linhaColunas(secAtual));
+  const mistoHibrido = /ICMS\/ISS/.test(linhaColunas(secHibrido));
   let colunasAtual = ["IRPJ", "CSLL", "COFINS", "PIS", "INSS/CPP", "ISS", "Total DAS"];
   if (comercio) {
     const linhaCab = cabecalho(secAtual).split("\n").find((l) => /Total DAS/i.test(l)) ?? "";
-    const achados = linhaCab.match(/IRPJ|CSLL|COFINS|PIS|INSS\/CPP|ICMS|IPI|ISS|Total DAS/g);
+    const achados = linhaCab.match(/IRPJ|CSLL|COFINS|PIS|INSS\/CPP|ICMS\/ISS|ICMS|IPI|ISS|Total DAS/g);
     if (achados?.includes("Total DAS")) colunasAtual = achados;
   }
   const idxAtual = (nome: string) => colunasAtual.indexOf(nome) + 1;
-  const atualTributos = somarTributos(
-    colunasAtual
-      .filter((n) => n !== "Total DAS")
+  const separarMisto = (itens: Array<{ anexo: string; valor: number }>) => [
+    { nome: "ICMS", valores: itens.filter((i) => ehComercio(i.anexo)).map((i) => i.valor) },
+    { nome: "ISS", valores: itens.filter((i) => !ehComercio(i.anexo)).map((i) => i.valor) },
+  ];
+  const atualTributos = somarTributos([
+    ...colunasAtual
+      .filter((n) => n !== "Total DAS" && n !== "ICMS/ISS")
       .map((nome) => ({ nome, valores: atuais.map((v) => v[idxAtual(nome)] ?? 0) })),
-  );
+    ...(mistoAtual
+      ? separarMisto(linhasPorAnexo(secAtual).map((l) => ({ anexo: l.anexo, valor: l.valores[idxAtual("ICMS/ISS")] ?? 0 })))
+      : []),
+  ]);
 
   // Localiza o DAS Híbrido como o valor que é a soma dos tributos anteriores
   // (IRPJ + CSLL + INSS/CPP + ISS, ou ICMS/IPI no comércio). CBS líquido = Total − DAS.
-  const nomesDas = comIcms(secHibrido)
-    ? ["IRPJ", "CSLL", "INSS/CPP", "ICMS", ...(comIpi(secHibrido) ? ["IPI"] : [])]
-    : ["IRPJ", "CSLL", "INSS/CPP", "ISS"];
+  const nomesDas = mistoHibrido
+    ? ["IRPJ", "CSLL", "INSS/CPP", "ICMS/ISS"]
+    : comIcms(secHibrido)
+      ? ["IRPJ", "CSLL", "INSS/CPP", "ICMS", ...(comIpi(secHibrido) ? ["IPI"] : [])]
+      : ["IRPJ", "CSLL", "INSS/CPP", "ISS"];
   const k = nomesDas.length;
-  const partesHibrido = hibridos.map((v) => {
+  const decomporHibrido = (v: number[]) => {
     for (let i = k; i < v.length; i++) {
       const partes = v.slice(i - k, i);
       const somaPartes = partes.reduce((x, y) => x + y, 0);
@@ -386,9 +398,15 @@ export function parseMemoriaCalculo(textoOriginal: string): Simulacoes {
       }
     }
     return { partes: nomesDas.map(() => 0), cbs: 0 };
-  });
+  };
+  const partesHibrido = hibridos.map(decomporHibrido);
   const hibridoTributos = somarTributos([
-    ...nomesDas.map((nome, j) => ({ nome, valores: partesHibrido.map((p) => p.partes[j] ?? 0) })),
+    ...nomesDas
+      .map((nome, j) => ({ nome, valores: partesHibrido.map((p) => p.partes[j] ?? 0) }))
+      .filter((l) => l.nome !== "ICMS/ISS"),
+    ...(mistoHibrido
+      ? separarMisto(linhasPorAnexo(secHibrido).map((l) => ({ anexo: l.anexo, valor: decomporHibrido(l.valores).partes[k - 1] ?? 0 })))
+      : []),
     { nome: "CBS", valores: partesHibrido.map((p) => p.cbs) },
   ]);
 
