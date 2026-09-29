@@ -261,7 +261,11 @@ function somarTributos(linhas: Array<{ nome: string; valores: number[] }>) {
 function repararBloco(bloco: string, preencherTracos = false): string {
   const linhas = bloco.split("\n");
   let principal = (linhas[0] ?? "").replace(/(R\$\s*[\d.]+,\d)\s+(\d)(?![\d,.%])/g, "$1$2");
-  if (preencherTracos) principal = principal.replace(/(\s)—(?=\s|$)/g, "$1R$ 0,00");
+  if (preencherTracos) {
+    // o "—" logo após a competência é o rótulo "— soma do mês", não um valor
+    const prefixo = principal.match(/^\s*\d{2}\/\d{4}[ \t]*—?/)?.[0] ?? "";
+    principal = prefixo + principal.slice(prefixo.length).replace(/(\s)—(?=\s|$)/g, "$1R$ 0,00");
+  }
   const sobras: string[] = [];
   for (const l of linhas.slice(1)) {
     for (const t of l.trim().split(/\s+/)) if (/^,?\d{1,2}$/.test(t)) sobras.push(t);
