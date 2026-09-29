@@ -52,7 +52,7 @@ const ETAPAS = [
 const HUB_URL = "https://hub-logica.vercel.app";
 
 // Acesso liberado somente pelo portal Luz.IA.
-const GATE_LUZIA_ATIVO = true;
+const GATE_LUZIA_ATIVO = false;
 
 function Index() {
   const [estado, setEstado] = useState<"carregando" | "autorizado" | "negado">(
