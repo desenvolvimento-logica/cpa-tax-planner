@@ -309,6 +309,20 @@ function linhasMensais(secao: string, preencherTracos = false): number[][] {
   });
 }
 
+/** Linhas individuais (sem "soma do mês") com o Anexo de cada uma. */
+function linhasPorAnexo(secao: string): Array<{ anexo: string; valores: number[] }> {
+  return secao
+    .split(/(?=^\s*\d{2}\/\d{4}\b)/m)
+    .filter((bloco) => /^\s*\d{2}\/\d{4}/.test(bloco))
+    .filter((bloco) => !(/^\s*\d{2}\/\d{4}[ \t]*—/.test(bloco) || /soma do/i.test(bloco.split("\n").slice(0, 2).join(" "))))
+    .map((bloco) => {
+      const primeira = (bloco.trim().split("\n")[0] ?? "").slice(7).replace(/\(Anexo[^)]*\)/g, " ");
+      const anexo = primeira.match(/(?:^|\s)(I{1,3}|IV|V)(?=\s)/)?.[1] ?? "";
+      return { anexo, valores: (repararBloco(bloco.trim()).match(RX_MOEDA) ?? []).map(num) };
+    });
+}
+const ehComercio = (anexo: string) => anexo === "I" || anexo === "II";
+
 /** Cabeçalho da seção (antes da primeira competência). */
 const cabecalho = (secao: string) => secao.split(/^\s*\d{2}\/\d{4}\b/m)[0] ?? "";
 /** Linha de títulos das colunas (a que começa com "Competência"). */
