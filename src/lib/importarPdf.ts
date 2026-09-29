@@ -422,10 +422,11 @@ export function parseMemoriaCalculo(textoOriginal: string): Simulacoes {
   // CBS (bruto/créd/líq), [Resultado DRE], IRPJ, Adicional, CSLL, Total.
   const tributosComercio = (linhas: number[][], sec: string, real: boolean) => {
     const cols = ["rec", "folha", "icmsD", "icmsC", "ICMS", ...(comIpi(sec) ? ["ipiD", "ipiC", "IPI"] : []),
+      ...(/\bISS\b/.test(linhaColunas(sec)) ? ["ISS"] : []),
       "INSS/CPP", "cbsB", "cbsC", "CBS", ...(real ? ["res"] : []), "IRPJ", "Adicional IRPJ", "CSLL", "total"];
     const col = (n: string) => cols.indexOf(n);
     return somarTributos(
-      ["ICMS", "IPI", "INSS/CPP", "CBS", "IRPJ", "Adicional IRPJ", "CSLL"]
+      ["ICMS", "IPI", "ISS", "INSS/CPP", "CBS", "IRPJ", "Adicional IRPJ", "CSLL"]
         .filter((n) => col(n) >= 0)
         .map((nome) => ({ nome, valores: linhas.map((v) => (v.length === cols.length ? v[col(nome)] ?? 0 : 0)) })),
     );
